@@ -1,0 +1,242 @@
+---
+interface Props {
+  slug: string;
+  size?: number;
+  strokeWidth?: number;
+  class?: string;
+}
+const { slug, size = 22, strokeWidth = 1.5, class: className } = Astro.props;
+---
+
+<svg
+  class:list={['tool-icon', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {slug === 'json-formatter' && (
+    <g>
+      <path d="M7 4C5.5 4 4.5 4.8 4.5 6.5V9c0 1.2-.8 2-2 2.5 1.2.5 2 1.3 2 2.5v2.5C4.5 19.2 5.5 20 7 20" />
+      <path d="M17 4c1.5 0 2.5.8 2.5 2.5V9c0 1.2.8 2 2 2.5-1.2.5-2 1.3-2 2.5v2.5c0 1.7-1 2.5-2.5 2.5" />
+      <rect
+        x="8"
+        y="7.5"
+        width="4.5"
+        height="3"
+        rx="1"
+        fill="currentColor"
+        fill-opacity="0.2"
+      />
+      <path d="M14.5 9h2" />
+      <rect
+        x="8"
+        y="13.5"
+        width="4.5"
+        height="3"
+        rx="1"
+        fill="currentColor"
+        fill-opacity="0.2"
+      />
+      <path d="M14.5 15h2" />
+      <circle cx="10" cy="12" r="0.8" fill="currentColor" />
+    </g>
+  )}
+
+  {slug === 'text-compare' && (
+    <g>
+      <rect
+        x="3.5"
+        y="4"
+        width="7.5"
+        height="16"
+        rx="2"
+        fill="currentColor"
+        fill-opacity="0.08"
+      />
+      <path d="M5.5 8h3.5M5.5 11.5h3.5" />
+      <path d="M5.5 15h3.5" stroke-dasharray="1.5 1" opacity="0.6" />
+      <circle
+        cx="7.25"
+        cy="5.25"
+        r="1.25"
+        fill="currentColor"
+        fill-opacity="0.2"
+      />
+      <path d="M6.25 5.25h2" stroke-width="1.2" />
+
+      <rect
+        x="13"
+        y="4"
+        width="7.5"
+        height="16"
+        rx="2"
+        fill="currentColor"
+        fill-opacity="0.16"
+      />
+      <path d="M15 8h3.5M15 11.5h3.5" />
+      <path d="M15 15h3.5" stroke-width={strokeWidth + 0.5} />
+      <circle
+        cx="16.75"
+        cy="5.25"
+        r="1.25"
+        fill="currentColor"
+        fill-opacity="0.2"
+      />
+      <path d="M15.75 5.25h2M16.75 4.25v2" stroke-width="1.2" />
+    </g>
+  )}
+
+  {slug === 'cron-generator' && (
+    <g>
+      <path d="M21 12a9 9 0 1 1-2.64-6.36M21 3.5v5.5h-5.5" />
+      <circle cx="12" cy="12" r="5" fill="currentColor" fill-opacity="0.12" />
+      <path d="M12 9v3.2l2.3 1.4" />
+      <circle cx="12" cy="3.5" r="1" fill="currentColor" />
+      <circle cx="19.5" cy="7.5" r="1" fill="currentColor" />
+      <circle cx="19.5" cy="16.5" r="1" fill="currentColor" />
+      <circle cx="4.5" cy="16.5" r="1" fill="currentColor" />
+      <circle cx="4.5" cy="7.5" r="1" fill="currentColor" />
+    </g>
+  )}
+
+  {slug === 'unix-timestamp-converter' && (
+    <g>
+      <circle
+        cx="11.5"
+        cy="13.5"
+        r="7.5"
+        fill="currentColor"
+        fill-opacity="0.08"
+      />
+      <path d="M9.5 2.5h4M11.5 2.5v3.5M16.8 7.2l1.4-1.4" />
+      <path d="M11.5 10.5v3l2.2 1.3" />
+      <rect
+        x="13.5"
+        y="13.5"
+        width="7.5"
+        height="7.5"
+        rx="1.8"
+        fill="currentColor"
+        fill-opacity="0.22"
+      />
+      <path d="M15.5 12.5v2M19 12.5v2M13.5 16.5h7.5" />
+      <circle cx="17.25" cy="18.5" r="0.75" fill="currentColor" />
+    </g>
+  )}
+
+  {slug === 'password-generator' && (
+    <g>
+      <rect
+        x="3.5"
+        y="10"
+        width="10"
+        height="10"
+        rx="2.5"
+        fill="currentColor"
+        fill-opacity="0.14"
+      />
+      <path d="M6 10V6.5a2.5 2.5 0 0 1 5 0V10" />
+      <circle cx="8.5" cy="14" r="1" fill="currentColor" />
+      <path d="M8.5 15v2" />
+      <path d="M16 4.5a2.2 2.2 0 0 1 2.2 2.2c0 .6-.3 1.2-.7 1.6L14.5 11M16.5 8.5l1.2 1.2M18.2 7.2l1 1" />
+      <path
+        d="M16 15h.01M18.5 15h.01M21 15h.01"
+        stroke-width={strokeWidth + 1}
+      />
+      <path
+        d="M16 18.5h.01M18.5 18.5h.01M21 18.5h.01"
+        stroke-width={strokeWidth + 1}
+        opacity="0.5"
+      />
+    </g>
+  )}
+
+  {slug === 'base64-encoder-decoder' && (
+    <g>
+      <rect
+        x="3"
+        y="3.5"
+        width="7.5"
+        height="7.5"
+        rx="2"
+        fill="currentColor"
+        fill-opacity="0.16"
+      />
+      <path
+        d="M5.5 5.5v3.5M7.5 7.5a1 1 0 0 0-1-1v1.5a1 1 0 0 0 1 1"
+        stroke-width="1.2"
+      />
+      <rect
+        x="13.5"
+        y="13"
+        width="7.5"
+        height="7.5"
+        rx="2"
+        fill="currentColor"
+        fill-opacity="0.16"
+      />
+      <path d="M15.5 18.5l1.7-4 1.8 4M16 17.2h2.5" stroke-width="1.2" />
+      <path d="M13.5 6.5h4a2 2 0 0 1 2 2v1.5M17.5 8.5l2 2 2-2" />
+      <path d="M10.5 17.5H6.5a2 2 0 0 1-2-2V14M6.5 15.5l-2-2-2 2" />
+    </g>
+  )}
+
+  {slug === 'url-encoder-decoder' && (
+    <g>
+      <path d="M9.5 14.5l-1.8 1.8a3.2 3.2 0 0 1-4.5-4.5l2.2-2.2a3.2 3.2 0 0 1 4.5 0" />
+      <path d="M14.5 9.5l1.8-1.8a3.2 3.2 0 0 1 4.5 4.5l-2.2 2.2a3.2 3.2 0 0 1-4.5 0" />
+      <path d="M9 15l6-6" />
+      <rect
+        x="13"
+        y="14"
+        width="8"
+        height="6.5"
+        rx="1.8"
+        fill="currentColor"
+        fill-opacity="0.18"
+      />
+      <path d="M15.2 18.8l3.6-3.6" stroke-width="1.2" />
+      <circle cx="15.5" cy="15.8" r="0.6" fill="currentColor" />
+      <circle cx="18.5" cy="18.8" r="0.6" fill="currentColor" />
+    </g>
+  )}
+
+  {slug === 'uuid-generator' && (
+    <g>
+      <rect
+        x="3.5"
+        y="3.5"
+        width="17"
+        height="17"
+        rx="3.5"
+        fill="currentColor"
+        fill-opacity="0.08"
+      />
+      <circle cx="8" cy="8" r="1.5" fill="currentColor" fill-opacity="0.25" />
+      <circle cx="16" cy="8" r="1.5" fill="currentColor" fill-opacity="0.25" />
+      <circle cx="8" cy="16" r="1.5" fill="currentColor" fill-opacity="0.25" />
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" fill-opacity="0.25" />
+      <rect
+        x="10"
+        y="10"
+        width="4"
+        height="4"
+        rx="1"
+        fill="currentColor"
+        fill-opacity="0.35"
+      />
+      <path
+        d="M8 9.5v5M16 9.5v5M9.5 8h5M9.5 16h5"
+        stroke-dasharray="1.5 1.5"
+        stroke-width="1.2"
+      />
+    </g>
+  )}
+</svg>

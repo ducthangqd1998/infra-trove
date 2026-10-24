@@ -1,0 +1,294 @@
+---
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../styles/global.css';
+import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import geistVietnamese from '@fontsource-variable/geist/files/geist-vietnamese-wght-normal.woff2?url';
+import Icon from '../components/Icon.astro';
+import { tools } from '../data/tools';
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+  /** Other-language versions of this page, as site paths. */
+  alternates?: { lang: string; path: string }[];
+  /** `app` widens the container for tool pages (header and footer included, so edges line up). */
+  shell?: 'site' | 'app' | 'reading';
+  /** Language of the main content (`<html lang>`); site chrome stays English. */
+  lang?: string;
+}
+const {
+  title,
+  description,
+  noindex = false,
+  alternates = [],
+  shell = 'site',
+  lang = 'en',
+} = Astro.props;
+const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true' && !noindex;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname;
+const inGuides = path.startsWith('/blog') || path.startsWith('/vi/blog');
+// Preload the text font so the first paint does not swap fonts (layout shift).
+const fonts = path.startsWith('/vi/')
+  ? [geistLatin, geistVietnamese]
+  : [geistLatin];
+const footerTools = tools.slice(0, 5);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{title} | InfraTrove</title>
+    <meta name="description" content={description} />
+    <meta
+      name="robots"
+      content={indexable ? 'index,follow' : 'noindex,follow'}
+    />
+    {indexable && <link rel="canonical" href={canonical} />}
+    {indexable &&
+      alternates.map((alt) => (
+        <link
+          rel="alternate"
+          hreflang={alt.lang}
+          href={new URL(alt.path, Astro.site)}
+        />
+      ))}
+    <meta property="og:title" content={`${title} | InfraTrove`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="InfraTrove" />
+    {indexable && <meta property="og:url" content={canonical} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {fonts.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#171a21"
+      media="(prefers-color-scheme: dark)"
+    />
+    <script is:inline>
+      try {
+        document.documentElement.dataset.js = 'true';
+        const theme = localStorage.getItem('infratrove-theme');
+        document.documentElement.dataset.theme =
+          theme === 'light' || theme === 'dark'
+            ? theme
+            : matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        if (localStorage.getItem('infratrove-sidebar') === 'collapsed')
+          document.documentElement.dataset.sidebar = 'collapsed';
+      } catch {}
+    </script>
+  </head>
+  <body data-shell={shell}>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/" aria-label="InfraTrove home">
+          <span class="brand-mark" aria-hidden="true">
+            <Icon name="layers" size={18} />
+          </span>
+          InfraTrove
+        </a>
+        <nav class="desktop-nav" aria-label="Main navigation">
+          <a
+            href="/tools/"
+            aria-current={path.startsWith('/tools') ? 'page' : undefined}
+          >
+            Tools
+          </a>
+          <a href="/blog/" aria-current={inGuides ? 'page' : undefined}>
+            Guides
+          </a>
+          <a
+            href="/about/"
+            aria-current={path === '/about/' ? 'page' : undefined}
+          >
+            About
+          </a>
+        </nav>
+        <div class="header-actions">
+          <a href="/tools/#tool-search" class="search-link">
+            <Icon name="search" size={16} />
+            <span>Search tools</span>
+            <kbd aria-hidden="true">⌘ K</kbd>
+          </a>
+          <button
+            class="icon-button"
+            id="theme-toggle"
+            aria-label="Toggle color theme"
+          >
+            <Icon name="moon" class="icon-moon" />
+            <Icon name="sun" class="icon-sun" />
+          </button>
+          <button
+            class="icon-button menu-trigger"
+            id="menu-trigger"
+            aria-label="Menu"
+            aria-controls="mobile-menu"
+            aria-expanded="false"
+          >
+            <Icon name="menu" />
+          </button>
+        </div>
+      </div>
+    </header>
+    <dialog id="mobile-menu" aria-labelledby="mobile-menu-title">
+      <div class="mobile-menu-heading">
+        <h2 id="mobile-menu-title">Navigation</h2>
+        <button
+          class="icon-button"
+          id="menu-close"
+          aria-label="Close navigation"
+        >
+          <Icon name="close" />
+        </button>
+      </div>
+      <nav aria-label="Mobile navigation">
+        <a
+          href="/tools/"
+          aria-current={path.startsWith('/tools') ? 'page' : undefined}
+        >
+          Tools
+        </a>
+        <a href="/blog/" aria-current={inGuides ? 'page' : undefined}>
+          Guides
+        </a>
+        <a
+          href="/about/"
+          aria-current={path === '/about/' ? 'page' : undefined}
+        >
+          About
+        </a>
+      </nav>
+    </dialog>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-top">
+        <div class="footer-brand">
+          <a class="brand" href="/">
+            <span class="brand-mark" aria-hidden="true">
+              <Icon name="layers" size={18} />
+            </span>
+            InfraTrove
+          </a>
+          <p>
+            Small browser-based tools and practical guides for everyday
+            technical work.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h2>Tools</h2>
+          <ul>
+            {footerTools.map((tool) => (
+              <li>
+                <a href={`/tools/${tool.slug}/`}>{tool.shortTitle}</a>
+              </li>
+            ))}
+            <li>
+              <a href="/tools/">All tools</a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>Guides</h2>
+          <ul>
+            <li>
+              <a href="/blog/" hreflang="en">
+                Guides in English
+              </a>
+            </li>
+            <li>
+              <a href="/vi/blog/" hreflang="vi" lang="vi">
+                Hướng dẫn tiếng Việt
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>Company</h2>
+          <ul>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+            <li>
+              <a href="/privacy/">Privacy</a>
+            </li>
+            <li>
+              <a href="/terms/">Terms</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© {new Date().getFullYear()} InfraTrove</span>
+        <span>
+          <Icon name="shield" size={16} /> Browser-based. No account needed.
+        </span>
+      </div>
+    </footer>
+    <script>
+      const menu = document.getElementById(
+        'mobile-menu',
+      ) as HTMLDialogElement | null;
+      const trigger = document.getElementById('menu-trigger');
+      trigger?.addEventListener('click', () => {
+        menu?.showModal();
+        trigger.setAttribute('aria-expanded', 'true');
+        document.documentElement.classList.add('menu-open');
+      });
+      document
+        .getElementById('menu-close')
+        ?.addEventListener('click', () => menu?.close());
+      menu?.addEventListener('close', () => {
+        trigger?.setAttribute('aria-expanded', 'false');
+        document.documentElement.classList.remove('menu-open');
+        trigger?.focus();
+      });
+      menu?.addEventListener('click', (event) => {
+        const rect = menu.getBoundingClientRect();
+        if (
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom
+        )
+          menu.close();
+      });
+      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const theme =
+          document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        try {
+          localStorage.setItem('infratrove-theme', theme);
+        } catch {}
+      });
+      document.addEventListener('keydown', (event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+          event.preventDefault();
+          const search = document.getElementById('tool-search');
+          if (search) search.focus();
+          else window.location.href = '/tools/#tool-search';
+        }
+      });
+    </script>
+  </body>
+</html>

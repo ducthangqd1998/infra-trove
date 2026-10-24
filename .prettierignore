@@ -1,0 +1,10 @@
+node_modules
+dist
+.astro
+pnpm-lock.yaml
+plans
+playwright-report
+test-results
+
+# Keep local agent instructions in their authored format.
+AGENTS.md

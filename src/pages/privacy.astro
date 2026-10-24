@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy"
+  description="How InfraTrove handles tool input, local preferences and hosting requests."
+>
+  <article class="container prose">
+    <div class="eyebrow">Last updated · October 24, 2026</div>
+    <h1>Your input stays in your browser.</h1>
+    <h2>Tool input and output</h2>
+    <p>
+      Tools process the text you enter and the results they generate inside your
+      browser tab. This release has no server endpoint to receive tool input, no
+      input history and no automatic persistence of passwords, text or results.
+    </p>
+    <h2>Local preferences</h2>
+    <p>
+      We use localStorage for your selected theme and favorite tool identifiers.
+      These values stay in your browser profile. You can remove them by clearing
+      site data. The tools still work if this storage is unavailable.
+    </p>
+    <h2>Scripts and measurement</h2>
+    <p>
+      This release does not include advertising, analytics, session replay or
+      remote error-reporting scripts. Tool pages load no third-party scripts.
+      Copying output uses your system clipboard only when you click a copy
+      button. Your device and browser extensions may have their own access to
+      clipboard or page contents.
+    </p>
+    <h2>Guide comments</h2>
+    <p>
+      Guides have an optional comment form. When you post, we store the name and
+      comment you enter, the guide it belongs to and the time. We do not store
+      your IP address: a keyed fingerprint of it that changes every day is kept
+      only to limit spam. Before posting, Cloudflare Turnstile checks that you
+      are not a bot; its script loads only after you start writing a comment and
+      is processed by Cloudflare under its policies.
+    </p>
+    <h2>Hosting requests</h2>
+    <p>
+      Serving the website requires normal HTTP requests for pages and assets.
+      The hosting provider may process technical request information such as IP
+      addresses and request headers under its policies. Local development is
+      served by your development machine; the deployment target is Cloudflare
+      Static Assets.
+    </p>
+    <h2>External links</h2>
+    <p>
+      Guides may link to outside documentation. Those sites have separate data
+      practices. Tool inputs are not included in these links.
+    </p>
+    <h2>Questions</h2>
+    <p>
+      See <a href="/contact/">Contact</a> for the current support status. This
+      policy must be reviewed when hosting, contact channels or third-party
+      integrations change.
+    </p>
+  </article>
+</BaseLayout>

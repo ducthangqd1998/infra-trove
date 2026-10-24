@@ -1,0 +1,54 @@
+---
+import Icon from './Icon.astro';
+import { getTool } from '../data/tools';
+import { blogText } from '../lib/i18n';
+import { postHref, postLang, postSlug, type Post } from '../lib/blog';
+interface Props {
+  post: Post;
+  tone?: number;
+  featured?: boolean;
+}
+const { post, tone = 0, featured = false } = Astro.props;
+const lang = postLang(post);
+const t = blogText[lang];
+const tool = getTool(post.data.tool);
+const href = postHref(lang, postSlug(post));
+const Heading = featured ? 'h2' : 'h3';
+---
+
+<article
+  class:list={[featured ? 'featured-post' : 'post-card']}
+  lang={lang}
+  data-post
+  data-category={post.data.category}
+>
+  <div class="cover" data-tone={(tone % 3) + 1} aria-hidden="true">
+    <span class="cover-symbol">
+      <img
+        src={`/images/tools/${tool.slug}.jpg`}
+        alt=""
+        class="cover-3d-img"
+        width={featured ? 112 : 68}
+        height={featured ? 112 : 68}
+        loading="lazy"
+      />
+    </span>
+  </div>
+  <div class={featured ? 'featured-body' : 'post-card-body'}>
+    <div class="post-meta">
+      {featured && <span class="badge">{t.featured}</span>}
+      <span class="badge">{post.data.category}</span>
+    </div>
+    <Heading>
+      <a href={href}>{post.data.title}</a>
+    </Heading>
+    <p>{post.data.description}</p>
+    <div class="card-foot">
+      <span class="card-tags">{post.data.readingTime}</span>
+      <span class="card-link">
+        {t.openGuide}
+        <Icon name="arrow" size={16} />
+      </span>
+    </div>
+  </div>
+</article>

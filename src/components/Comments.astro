@@ -1,0 +1,185 @@
+---
+import { blogText } from '../lib/i18n';
+import type { Lang } from '../lib/blog';
+interface Props {
+  /** Content id, e.g. "en/json-trailing-commas". */
+  post: string;
+  lang: Lang;
+}
+const { post, lang } = Astro.props;
+const t = blogText[lang];
+// Cloudflare's always-pass test key unless a real one is configured.
+const siteKey =
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+---
+
+<section
+  class="comments"
+  id="comments"
+  aria-labelledby="comments-title"
+  data-post={post}
+  data-lang={lang}
+  data-sitekey={siteKey}
+  data-empty={t.commentsEmpty}
+  data-unavailable={t.commentsUnavailable}
+  data-posting={t.commentPosting}
+  data-posted={t.commentPosted}
+  data-error={t.commentError}
+>
+  <div class="comments-head">
+    <h2 id="comments-title">{t.comments}</h2>
+    <span class="comments-count" hidden></span>
+  </div>
+  <p class="comments-status" role="status">
+    {t.commentsLoading}
+  </p>
+  <ol class="comment-list" role="list"></ol>
+  <form class="comment-form" hidden novalidate>
+    <label class="field">
+      {t.commentName}
+      <input name="name" maxlength="60" autocomplete="nickname" required />
+    </label>
+    <label class="field">
+      {t.commentBody}
+      <textarea name="body" rows="4" maxlength="2000" required></textarea>
+    </label>
+    <div class="turnstile-slot"></div>
+    <p class="comment-note">{t.commentNote}</p>
+    <div class="comment-actions">
+      <button class="button" type="submit">
+        {t.commentSubmit}
+      </button>
+      <p class="comment-feedback" role="status"></p>
+    </div>
+  </form>
+</section>
+<script>
+  type Comment = { id: string; name: string; body: string; createdAt: string };
+  type Turnstile = {
+    render: (
+      element: HTMLElement,
+      options: Record<string, unknown>,
+    ) => string | undefined;
+    reset: (id?: string) => void;
+  };
+  const turnstileWindow = window as Window & { turnstile?: Turnstile };
+  const root = document.querySelector<HTMLElement>('.comments');
+  if (root) {
+    const { post = '', lang = 'en', sitekey = '' } = root.dataset;
+    const text = root.dataset;
+    const status = root.querySelector<HTMLElement>('.comments-status')!;
+    const count = root.querySelector<HTMLElement>('.comments-count')!;
+    const list = root.querySelector<HTMLOListElement>('.comment-list')!;
+    const form = root.querySelector<HTMLFormElement>('.comment-form')!;
+    const slot = root.querySelector<HTMLElement>('.turnstile-slot')!;
+    const feedback = root.querySelector<HTMLElement>('.comment-feedback')!;
+    const submit = form.querySelector<HTMLButtonElement>('button')!;
+    const dates = new Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+    let token = '';
+    let widget: string | undefined;
+    let total = 0;
+
+    // Text only: names and bodies are never parsed as HTML.
+    function add(comment: Comment) {
+      const item = document.createElement('li');
+      item.className = 'comment';
+      const head = document.createElement('div');
+      head.className = 'comment-meta';
+      const name = document.createElement('strong');
+      name.textContent = comment.name;
+      const time = document.createElement('time');
+      time.dateTime = comment.createdAt;
+      time.textContent = dates.format(new Date(comment.createdAt));
+      head.append(name, time);
+      const body = document.createElement('p');
+      body.textContent = comment.body;
+      item.append(head, body);
+      list.append(item);
+      total += 1;
+      count.textContent = String(total);
+      count.hidden = false;
+    }
+
+    // Turnstile is a third-party script: load it only once someone starts writing.
+    function loadTurnstile() {
+      if (document.getElementById('turnstile-api')) return;
+      const script = document.createElement('script');
+      script.id = 'turnstile-api';
+      script.src =
+        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.onload = () => {
+        widget = turnstileWindow.turnstile?.render(slot, {
+          sitekey,
+          language: lang,
+          callback: (value: string) => (token = value),
+          'expired-callback': () => (token = ''),
+        });
+      };
+      document.head.append(script);
+    }
+
+    async function load() {
+      try {
+        const response = await fetch(
+          `/api/comments?post=${encodeURIComponent(post)}`,
+          { headers: { accept: 'application/json' } },
+        );
+        if (
+          !response.ok ||
+          !response.headers.get('content-type')?.includes('application/json')
+        )
+          throw new Error('unavailable');
+        const data = (await response.json()) as { comments: Comment[] };
+        data.comments.forEach(add);
+        status.textContent = total ? '' : (text.empty ?? '');
+        form.hidden = false;
+      } catch {
+        // Static preview servers have no API; the guide still reads fine.
+        status.textContent = text.unavailable ?? '';
+      }
+    }
+
+    form.addEventListener('focusin', loadTurnstile, { once: true });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const values = new FormData(form);
+      submit.disabled = true;
+      feedback.textContent = text.posting ?? '';
+      try {
+        const response = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            post,
+            name: values.get('name'),
+            body: values.get('body'),
+            token,
+          }),
+        });
+        const data = (await response.json()) as {
+          comment?: Comment;
+          error?: string;
+        };
+        if (!response.ok || !data.comment)
+          throw new Error(data.error || text.error);
+        add(data.comment);
+        status.textContent = '';
+        form.querySelector('textarea')!.value = '';
+        feedback.textContent = text.posted ?? '';
+      } catch (error) {
+        feedback.textContent =
+          error instanceof Error ? error.message : (text.error ?? '');
+      } finally {
+        submit.disabled = false;
+        token = '';
+        turnstileWindow.turnstile?.reset(widget);
+      }
+    });
+    void load();
+  }
+</script>

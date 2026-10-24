@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit real values.
+# Cloudflare's test secret: every Turnstile check passes.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Any long random string; production uses `wrangler secret put IP_HASH_SECRET`.
+IP_HASH_SECRET=local-development-only-change-me

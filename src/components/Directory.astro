@@ -1,0 +1,86 @@
+---
+import { tools, categories } from '../data/tools';
+import ToolCard from './ToolCard.astro';
+import Icon from './Icon.astro';
+---
+
+<section class="directory" aria-label="Browse tools">
+  <h2 class="sr-only">Browse tools</h2>
+  <div class="directory-toolbar">
+    <div class="tabs" role="group" aria-label="Filter by category">
+      {categories.map((category, i) => (
+        <button
+          class:list={['chip', { active: i === 0 }]}
+          data-filter={category}
+          aria-pressed={i === 0}
+        >
+          {category}
+        </button>
+      ))}
+      <button class="chip" data-filter="Favorites" aria-pressed="false">
+        <Icon name="star" size={16} />
+        &nbsp;Favorites
+      </button>
+    </div>
+    <span class="result-count" aria-live="polite">
+      <span id="tool-count">{tools.length}</span> tools
+    </span>
+  </div>
+  <div class="tool-grid">
+    {tools.map((tool) => (
+      <ToolCard tool={tool} />
+    ))}
+  </div>
+  <p id="empty-results" class="empty-results" hidden>
+    No tools found. Try another search or save a tool as a favorite.
+  </p>
+</section>
+<script>
+  let active = 'All tools';
+  const input = document.getElementById(
+    'tool-search',
+  ) as HTMLInputElement | null;
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-tool-card]')];
+  function filter() {
+    let favorites: string[] = [];
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem('infratrove-favorites') || '[]',
+      );
+      if (Array.isArray(saved)) favorites = saved;
+    } catch {}
+    const query = input?.value.toLowerCase().trim() || '';
+    let count = 0;
+    cards.forEach((card) => {
+      const visible =
+        (card.dataset.search || '').includes(query) &&
+        (active === 'All tools' ||
+          (active === 'Favorites'
+            ? favorites.includes(card.dataset.slug || '')
+            : card.dataset.category === active));
+      card.hidden = !visible;
+      if (visible) count++;
+    });
+    const countElement = document.getElementById('tool-count');
+    if (countElement) countElement.textContent = String(count);
+    document
+      .getElementById('empty-results')
+      ?.toggleAttribute('hidden', count > 0);
+  }
+  input?.addEventListener('input', filter);
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-filter]')
+    .forEach((button) =>
+      button.addEventListener('click', () => {
+        active = button.dataset.filter || 'All tools';
+        document
+          .querySelectorAll<HTMLButtonElement>('[data-filter]')
+          .forEach((item) => {
+            item.classList.toggle('active', item === button);
+            item.setAttribute('aria-pressed', String(item === button));
+          });
+        filter();
+      }),
+    );
+  if (location.hash === '#tool-search') input?.focus();
+</script>

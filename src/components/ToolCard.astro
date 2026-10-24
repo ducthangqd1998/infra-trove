@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro';
+import ToolIcon from './ToolIcon.astro';
+import type { Tool } from '../data/tools';
+interface Props {
+  tool: Tool;
+}
+const { tool } = Astro.props;
+---
+
+<article
+  class="tool-card"
+  data-tool-card
+  data-slug={tool.slug}
+  data-category={tool.category}
+  data-search={`${tool.title} ${tool.category} ${tool.tags.join(' ')}`.toLowerCase()}
+>
+  <div class="card-top">
+    <span class="tool-symbol" aria-hidden="true">
+      <ToolIcon slug={tool.slug} size={24} />
+    </span>
+    <span class="card-category">{tool.category}</span>
+  </div>
+  <div class="card-body">
+    <h3>
+      <a href={`/tools/${tool.slug}/`}>{tool.shortTitle}</a>
+    </h3>
+    <p>{tool.summary}</p>
+  </div>
+  <div class="card-foot">
+    <span class="card-tags">{tool.tags.slice(0, 2).join(' · ')}</span>
+    <span class="card-link">
+      Open tool <Icon name="arrow" size={16} />
+    </span>
+  </div>
+</article>

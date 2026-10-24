@@ -1,0 +1,76 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { blogText } from '../lib/i18n';
+import { blogHref, getPosts, langNames, langs, type Lang } from '../lib/blog';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = blogText[lang];
+const posts = await getPosts(lang);
+const categories = [...new Set(posts.map((post) => post.data.category))];
+const [featured, ...rest] = posts;
+---
+
+<BaseLayout
+  title={t.indexTitle}
+  description={t.indexDescription}
+  alternates={langs.map((item) => ({ lang: item, path: blogHref(item) }))}
+>
+  <div class="container page-section" lang={lang}>
+    <header class="blog-head banner">
+      <div class="eyebrow">{t.badge}</div>
+      <h1>{t.indexTitle}</h1>
+      <p class="page-intro">{t.indexIntro}</p>
+    </header>
+    <div class="blog-controls">
+      <div class="tabs js-only" role="group" aria-label={t.filterLabel}>
+        <button class="chip active" data-filter="" aria-pressed="true">
+          {t.all}
+        </button>
+        {categories.map((category) => (
+          <button class="chip" data-filter={category} aria-pressed="false">
+            {category}
+          </button>
+        ))}
+      </div>
+      <nav class="segmented" aria-label={t.languageLabel}>
+        {langs.map((item) => (
+          <a
+            href={blogHref(item)}
+            lang={item}
+            hreflang={item}
+            aria-current={item === lang ? 'page' : undefined}
+          >
+            {langNames[item]}
+          </a>
+        ))}
+      </nav>
+    </div>
+    {featured && <PostCard post={featured} tone={0} featured />}
+    <div class="post-grid">
+      {rest.map((post, i) => (
+        <PostCard post={post} tone={i + 1} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+<script>
+  const buttons = [
+    ...document.querySelectorAll<HTMLButtonElement>('[data-filter]'),
+  ];
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-post]')];
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => {
+      const category = button.dataset.filter || '';
+      buttons.forEach((item) => {
+        item.classList.toggle('active', item === button);
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      cards.forEach((card) => {
+        card.hidden = category !== '' && card.dataset.category !== category;
+      });
+    }),
+  );
+</script>

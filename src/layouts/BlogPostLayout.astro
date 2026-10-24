@@ -1,0 +1,119 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Comments from '../components/Comments.astro';
+import { getTool } from '../data/tools';
+import { blogText } from '../lib/i18n';
+import {
+  postHref,
+  postLang,
+  postSlug,
+  getTranslation,
+  type Post,
+} from '../lib/blog';
+import { render } from 'astro:content';
+interface Props {
+  post: Post;
+  tone?: number;
+}
+const { post, tone = 0 } = Astro.props;
+const lang = postLang(post);
+const t = blogText[lang];
+const tool = getTool(post.data.tool);
+const otherLang = lang === 'vi' ? 'en' : 'vi';
+const translation = await getTranslation(post);
+const translationHref = translation
+  ? postHref(otherLang, postSlug(translation))
+  : null;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<BaseLayout
+  title={`${post.data.title} · InfraTrove Guides`}
+  description={post.data.description}
+  lang={lang}
+  shell="reading"
+>
+  <article class="container post-article" lang={lang}>
+    <header class="post-header">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href={lang === 'vi' ? '/vi/blog/' : '/blog/'}>{t.indexTitle}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{post.data.category}</span>
+      </nav>
+      <h1>{post.data.title}</h1>
+      <p class="lead">{post.data.description}</p>
+      <div class="post-meta-row">
+        <span class="badge">{post.data.category}</span>
+        <span>{post.data.readingTime}</span>
+        <span aria-hidden="true">·</span>
+        <a class="badge-tool" href={`/tools/${tool.slug}/`}>
+          <span>{tool.shortTitle}</span>
+          <Icon name="arrow" size={14} />
+        </a>
+        {translationHref && (
+          <a
+            class="text-link lang-switch"
+            href={translationHref}
+            hreflang={otherLang}
+          >
+            <Icon name="globe" size={16} />
+            {t.translationLink}
+          </a>
+        )}
+      </div>
+    </header>
+    <div
+      class="cover post-cover"
+      data-tone={(Math.max(tone, 0) % 3) + 1}
+      aria-hidden="true"
+    >
+      <span class="cover-symbol">
+        <img
+          src={`/images/tools/${tool.slug}.jpg`}
+          alt=""
+          class="cover-3d-img"
+          width="136"
+          height="136"
+        />
+      </span>
+    </div>
+    <div class="post-layout">
+      <div class="prose">
+        <Content />
+      </div>
+      {toc.length > 1 && (
+        <aside>
+          <details class="toc" open>
+            <summary>
+              <Icon name="list" size={16} />
+              {t.toc}
+            </summary>
+            <ol>
+              {toc.map((item) => (
+                <li class={item.depth === 3 ? 'toc-sub' : undefined}>
+                  <a href={`#${item.slug}`}>{item.text}</a>
+                </li>
+              ))}
+            </ol>
+          </details>
+        </aside>
+      )}
+    </div>
+    <footer class="post-footer">
+      <div class="cta-box">
+        <div>
+          <p class="cta-eyebrow">{tool.shortTitle}</p>
+          <h2>{t.ctaTitle}</h2>
+          <p>{t.ctaBody}</p>
+        </div>
+        <a class="button button-primary" href={`/tools/${tool.slug}/`}>
+          {t.ctaButton}
+          <Icon name="arrow" size={18} />
+        </a>
+      </div>
+    </footer>
+    <Comments post={post.id} lang={lang} />
+  </article>
+</BaseLayout>
