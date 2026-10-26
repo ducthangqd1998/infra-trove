@@ -1,4 +1,10 @@
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
-  test: { include: ['src/**/*.test.ts', 'worker/**/*.test.ts'] },
+  test: {
+    include: [
+      'src/**/*.test.ts',
+      'worker/**/*.test.ts',
+      'functions/**/*.test.ts',
+    ],
+  },
 });

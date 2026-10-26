@@ -108,7 +108,11 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
           <h2>{t.ctaTitle}</h2>
           <p>{t.ctaBody}</p>
         </div>
-        <a class="button button-primary" href={`/tools/${tool.slug}/`}>
+        <a
+          class="button button-primary"
+          href={`/tools/${tool.slug}/`}
+          aria-label={`${t.ctaButton}: ${tool.shortTitle}`}
+        >
           {t.ctaButton}
           <Icon name="arrow" size={18} />
         </a>

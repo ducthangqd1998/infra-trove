@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy": "pnpm run build && wrangler deploy",
+    "deploy:pages": "pnpm run build && wrangler pages deploy dist --project-name infratrove",
     "types:worker": "wrangler types worker/worker-configuration.d.ts"
   },
   "dependencies": {
