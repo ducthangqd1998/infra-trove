@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 PORT ?= 4321
 PID_FILE := .dev.pid
 LOG_FILE := .dev.log
@@ -13,6 +14,9 @@ dev:
 		exit 0; \
 	fi; \
 	echo "Starting dev server in background..."; \
+	if [ -s "$$HOME/.nvm/nvm.sh" ]; then \
+		. "$$HOME/.nvm/nvm.sh" && nvm use >/dev/null 2>&1 || true; \
+	fi; \
 	nohup pnpm dev > "$(LOG_FILE)" 2>&1 & \
 	PNPM_PID=$$!; \
 	echo "$$PNPM_PID" > "$(PID_FILE)"; \

@@ -40,7 +40,11 @@ To add a tool, add tested logic/UI, a direct `.astro` route, registry metadata, 
 
 ## Scope decisions
 
-The implementation follows `plans/feature.md` for the eight candidate tools and canonical slugs: JSON, text compare, cron, timestamp, password, Base64, URL encoding and UUID. JWT is deferred. Keyword/SERP validation has not been completed; these are implementation candidates, not validated SEO opportunities. Password passphrases, bulk passwords and diff character-level highlighting remain future additions.
+Twelve tools are implemented: JSON, text compare, cron, timestamp, password, Base64, URL encoding, UUID, YAML ↔ JSON, JWT Decoder, Storage Unit Converter and Hash & Checksum. The [tool roadmap](plans/feature.md) is the source of truth for planned additions and their scope, updated on 2026-10-26.
+
+The completed expansion batch adds **YAML ↔ JSON, JWT Decoder, Storage Unit Converter and Hash & Checksum**, with four guides in both English and Vietnamese. YAML accepts one YAML 1.2 core document (100,000 characters), rejects aliases/custom tags and does not preserve comments. JWT decoding does not verify signatures. Hash supports SHA-256/SHA-512 with a 32 MiB file limit. The next queue starts with **Upload / Restore Time Calculator**, then SQL Formatter, JSON ↔ CSV, Regex Tester, IPv4 / CIDR and chmod. Later candidates include Text Utilities, HTML Escape / Unescape, static QR codes, JSON Diff and Backup Storage Calculator.
+
+Priorities reflect product fit and qualitative competitor research; keyword volume, SERP opportunity and traffic have not been validated. Publish only working tools, keep all tool processing in the browser, and group modes of the same task into one tool. Password passphrases, bulk passwords and diff character-level highlighting remain future additions.
 
 ## Preview and production
 

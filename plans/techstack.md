@@ -2,13 +2,13 @@
 title: "InfraTrove — Tech Stack & Architecture"
 version: "1.0"
 status: "Proposed technical baseline — ready for implementation planning"
-updated: "2026-10-24"
+updated: "2026-10-26"
 project: "InfraTrove"
 language: "vi-VN"
 website_language: "en"
 architecture: "Static-first website + client-side interactive utilities"
 business_model: "SEO + free online tools + evergreen content + display advertising"
-related_document: "InfraTrove_Website_Blueprint_v0.1.md"
+related_document: "feature.md"
 ---
 
 # InfraTrove — Tech Stack & Architecture (v1.0)
@@ -17,7 +17,7 @@ related_document: "InfraTrove_Website_Blueprint_v0.1.md"
 >
 > **Trạng thái:** Bản kiến trúc đề xuất, chưa phải source code đã được triển khai hoặc benchmark hiệu năng. Những lệnh bên dưới là hướng dẫn bootstrap, cần kiểm tra lại tương thích package versions khi chạy.
 >
-> **Tài liệu song hành:** `InfraTrove_Website_Blueprint_v0.1.md` mô tả sản phẩm và UX. Nếu blueprint với tài liệu này khác nhau ở chi tiết implementation, **tài liệu này ưu tiên cho tech stack**, còn các quyết định business/feature vẫn theo blueprint.
+> **Tài liệu song hành:** [feature.md](feature.md) mô tả sản phẩm và UX. Nếu blueprint với tài liệu này khác nhau ở chi tiết implementation, **tài liệu này ưu tiên cho tech stack**, còn trạng thái và thứ tự ưu tiên tools theo §5 của blueprint.
 
 ## 1. Executive decision
 
@@ -80,7 +80,8 @@ Các mục tiêu không thay đổi:
 - Search tool nhanh; Favorites lưu local (không chứa input).
 - Light/dark theme, responsive UI, keyboard usability.
 - SEO metadata, sitemap, canonical, robots.txt, Open Graph.
-- Ứng viên tools đầu tiên: Password Generator, Text Compare, Cron Generator, JSON Formatter, Unix Timestamp, Base64, JWT Decoder, UUID Generator; chính xác launch batch chốt sau keyword validation.
+- 8 tools core: Password Generator, Text Compare, Cron Generator, JSON Formatter, Unix Timestamp, Base64, URL Encoder/Decoder và UUID Generator.
+- Đợt mở rộng đã triển khai, tổng cộng 12 tools: YAML ↔ JSON, JWT Decoder, Storage Unit Converter và Hash & Checksum. Upload / Restore Time đứng đầu hàng đợi sau đó; phạm vi và thứ tự đầy đủ theo [feature.md](feature.md), cập nhật 2026-10-26. Đây là ưu tiên sản phẩm, chưa phải keyword/SEO validation.
 - Quality gates: lint/typecheck/tests/build/E2E smoke.
 - Search Console, analytics được cấu hình an toàn, Ads ở giai đoạn sau.
 
@@ -458,7 +459,7 @@ Giữ **single source of truth** cho metadata: hoặc registry chứa bản ng�
 
 ## 8. Proposed tool implementations
 
-Không triển khai tất cả trước khi có keyword validation. Đây là **technical requirements** khi một tool được chọn.
+Đây là **technical requirements**, không phải checklist chứng minh mọi tool đã triển khai. Trạng thái catalog và thứ tự xây mới theo §5 của [feature.md](feature.md); đợt mở rộng 4 tools đã có implementation, còn keyword/SEO validation vẫn chưa hoàn tất.
 
 | Tool | Core engine | Bắt buộc kiểm tra | Privacy |
 |---|---|---|---|
@@ -468,8 +469,19 @@ Không triển khai tất cả trước khi có keyword validation. Đây là **
 | Cron Generator | cron parser + humanization | dialect, timezone, DST, next runs | Ordinary |
 | Unix Timestamp | JS Date / timezone utilities | seconds vs ms, negative/overflow, zone | Ordinary |
 | Base64 | Web APIs + TextEncoder/Decoder | Unicode, URL-safe, invalid strings | Potentially-sensitive |
-| JWT Decoder | Base64URL decode + JSON | malformed token, `exp`, signature caveat | Secret |
+| URL Encoder / Decoder | `encodeURIComponent` / `decodeURIComponent` | Unicode, malformed percent escapes, component vs full URL | Potentially-sensitive |
 | UUID Generator | `crypto.randomUUID()` | valid UUID v4, bulk limit | Ordinary |
+
+**Đợt mở rộng đã triển khai ngày 2026-10-26:**
+
+| Tool | Core engine / constraints | Bắt buộc kiểm tra |
+|---|---|---|
+| YAML ↔ JSON | Parser safe, local; không execute tags | Aliases/nesting/input limits, parse errors, type/comment round-trip limits |
+| JWT Decoder | Base64URL + JSON, không fetch JWKS | Malformed token; `exp`/`iat`/`nbf`; decode không verify signature |
+| Storage Unit Converter | Phép đổi SI/IEC thuần; cùng logic dùng lại cho Transfer Time | 1000 vs 1024, bits vs bytes, precision, giá trị invalid |
+| Hash & Checksum | Web Crypto SHA-256/SHA-512; text/file local | Reference vectors, size/memory limit, expected checksum, không lưu input/file |
+
+Hàng đợi tiếp theo: Upload / Restore Time, SQL Formatter, JSON ↔ CSV, Regex Tester, IPv4 / CIDR và chmod. Không thêm backend để triển khai các tool này; quy tắc correctness và bản đầu theo §6.1 của product spec. Chỉ chọn thư viện và giới hạn cụ thể khi triển khai từng tool.
 
 ### 8.1 Password Generator
 
@@ -492,7 +504,7 @@ Không triển khai tất cả trước khi có keyword validation. Đây là **
 - Next execution preview cần sử dụng timezone rõ ràng, xử lý DST/ambiguous times đúng.
 - Với dialect không hỗ trợ, báo lỗi rõ thay vì cho kết quả có vẻ chính xác.
 
-### 8.4 JWT Decoder
+### 8.4 JWT Decoder — đã triển khai, chỉ decode
 
 - Decode **không đồng nghĩa verify signature**, UI phải nói rõ.
 - Không tự động gọi JWKS endpoint/third-party service bằng token đã paste.
@@ -754,7 +766,9 @@ Không nên tính giá trị thời gian founder là 0 khi đánh giá hiệu qu
 
 ### Phase B — First tool batch
 
-- [ ] Chọn 3–5 tools thông qua keyword/SERP validation.
+- Baseline cập nhật 2026-10-26: 8 tools core đã có implementation; không đánh dấu public launch hoặc SEO validation đã hoàn tất từ việc này.
+- [x] Triển khai đợt mở rộng theo product spec: YAML ↔ JSON, JWT Decoder, Storage Unit Converter, Hash & Checksum; bốn hướng dẫn đủ bản Anh/Việt, không route rỗng.
+- [ ] Đánh giá hàng đợi tiếp theo, bắt đầu với Upload / Restore Time Calculator.
 - [ ] Logic tests và privacy threat review cho từng tool.
 - [ ] Example data, errors, copy, reset, keyboard/mobile UX.
 - [ ] Related tools + how-to content.

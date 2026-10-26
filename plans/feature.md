@@ -2,7 +2,7 @@
 title: "InfraTrove — Website Blueprint & Product Requirements"
 version: "0.1"
 status: "Working draft — chưa xác thực thị trường"
-updated: "2026-10-24"
+updated: "2026-10-26"
 product_language: "English"
 document_language: "Vietnamese"
 brand: "InfraTrove"
@@ -56,7 +56,7 @@ Website phải có ích ngay cả khi người dùng không đọc blog, không 
 | SEO + display ads | **Đã chốt định hướng** | RPM và traffic thực tế chưa biết |
 | Blog gắn với tools | **Đã chốt định hướng** | Hướng dẫn, examples, troubleshooting, evergreen |
 | Cheat Sheets / Examples | **Đề xuất mở rộng** | Chỉ publish khi có giá trị riêng và SEO evidence |
-| Tool list và số lượng launch | **Candidate** | Chốt bằng keyword + SERP + competitor validation |
+| Tool catalog và thứ tự mở rộng | **Cập nhật 2026-10-26** | 12 tools đã triển khai, gồm đợt mở rộng 4 tools tại §5.2; hàng đợi tiếp theo tại §5.3; chưa xác thực cơ hội SEO |
 | Design tokens, logo, framework | **Đề xuất** | Có thể điều chỉnh sau prototype |
 | Target 100.000 pageviews/tháng | **Business aspiration** | Không có bảo đảm đạt được; không phải mục tiêu bắt buộc cho launch |
 | Mốc 24–36 tháng lên 100K PV/tháng | **Kịch bản hoạch định, độ tin cậy thấp** | Không phải thống kê hay dự báo được xác minh |
@@ -177,50 +177,94 @@ Categories là tổ chức nội dung, **không phải quota bắt buộc** ph�
 
 ## 5. Feature Portfolio & Priority
 
-**P0** = nghiên cứu/launch candidate mạnh; **P1** = wave mở rộng gần; **P2** = future backlog, chưa cam kết. Thứ tự cuối cùng cần keyword, SERP và competitor validation.
+**Cập nhật 2026-10-26:** Danh sách dưới đây phân biệt công cụ đã có và backlog sẽ làm. Thứ tự mở rộng dựa trên nghiên cứu định tính DevToys, IT-Tools, Genie9 và độ phù hợp với một solo founder làm browser-based utilities cho dev/DevOps. Đây là **ưu tiên sản phẩm**, không phải thứ hạng traffic hay kết quả keyword validation.
 
-### 5.1 Candidate launch set — 8 tools đầu tiên
+### 5.1 Current catalog — 12 tools đã triển khai
 
-| # | Tool | URL | Lý do đưa vào shortlist |
+Đối chiếu với `src/data/tools.ts` và các route hiện có. Có implementation không đồng nghĩa đã public launch hoặc đã xác thực SEO.
+
+| # | Tool | URL | Phạm vi hiện có |
 |---|---|---|---|
-| 1 | Text Compare / Diff | `/tools/text-compare/` | Repeat-use hypothesis; code/config/text workflows |
-| 2 | JSON Formatter & Validator | `/tools/json-formatter/` | Rõ task intent; hữu dụng với API/data |
-| 3 | Cron Expression Generator / Parser | `/tools/cron-generator/` | Interactive utility; có blog topic cluster |
-| 4 | Unix Timestamp Converter | `/tools/unix-timestamp-converter/` | Debug timestamps và timezone thường xuyên |
-| 5 | Password & Passphrase Generator | `/tools/password-generator/` | Audience rộng; cần UX và privacy chuẩn |
-| 6 | Base64 Encoder / Decoder | `/tools/base64-encoder-decoder/` | Tác vụ nhỏ, dễ dùng, chi phí thấp |
-| 7 | URL Encoder / Decoder | `/tools/url-encoder-decoder/` | Web/API debugging và xử lý query |
-| 8 | UUID Generator | `/tools/uuid-generator/` | Dễ triển khai, bổ sung generator family |
+| 1 | Text Compare / Diff | `/tools/text-compare/` | Line/word diff; side-by-side và unified; tùy chọn ignore case/whitespace |
+| 2 | JSON Formatter & Validator | `/tools/json-formatter/` | Format, minify và validate trong một tool |
+| 3 | Cron Expression Generator / Parser | `/tools/cron-generator/` | Unix 5 fields, giải nghĩa và preview 5 lần chạy kế tiếp |
+| 4 | Unix Timestamp Converter | `/tools/unix-timestamp-converter/` | Seconds/milliseconds ↔ ngày giờ; UTC/local/ISO |
+| 5 | Password Generator | `/tools/password-generator/` | Random password; passphrase và bulk chưa triển khai |
+| 6 | Base64 Encoder / Decoder | `/tools/base64-encoder-decoder/` | UTF-8 text; standard Base64 và Base64URL |
+| 7 | URL Encoder / Decoder | `/tools/url-encoder-decoder/` | Percent-encode/decode URL component |
+| 8 | UUID Generator | `/tools/uuid-generator/` | UUID v4, tạo 1–100 giá trị mỗi lượt |
+| 9 | YAML ↔ JSON Converter | `/tools/yaml-json-converter/` | Chuyển hai chiều, copy/download; YAML 1.2 core, không aliases/custom tags |
+| 10 | JWT Decoder | `/tools/jwt-decoder/` | Header/payload, NumericDate UTC; không verify chữ ký |
+| 11 | Storage Unit Converter | `/tools/storage-unit-converter/` | SI/IEC, phép tính phân số chính xác, kết quả 9 chữ số thập phân |
+| 12 | Hash & Checksum | `/tools/hash-checksum/` | SHA-256/SHA-512 cho text/file, đối chiếu checksum; file tối đa 32 MiB |
 
-**Lưu ý:** Đây là shortlist thiết kế. Nếu nghiên cứu cho thấy vài keyword quá cạnh tranh hoặc khó tạo khác biệt, có thể thay chúng trước khi code. Không nhất thiết launch cả 8 cùng lúc; nên release theo batch nhỏ.
+### 5.2 Completed batch — 4 tools mở rộng ngày 2026-10-26
 
-### 5.2 P1 candidates — mở rộng gần (sau validation)
+**Trạng thái: đã triển khai.** Catalog tăng từ 8 lên 12 tools, kèm 4 hướng dẫn có đủ bản Anh/Việt. Các slug dưới đây đã có route hoạt động. YAML giới hạn 100.000 ký tự, không aliases/custom tags; Hash giới hạn file 32 MiB. Không có placeholder trong directory.
 
-| Category | Tools |
+| Thứ tự | Tool | Slug | Phạm vi bản đầu | Lý do ưu tiên |
+|---|---|---|---|---|
+| 1 | YAML ↔ JSON Converter | `yaml-json-converter` | Chuyển hai chiều, báo lỗi, copy/download | Sát config, Kubernetes, CI/CD và API; bổ sung JSON tool hiện có |
+| 2 | JWT Decoder | `jwt-decoder` | Header/payload; đọc `exp`, `iat`, `nbf`; hiển thị chưa verify chữ ký | Tác vụ debug authentication rõ; tận dụng cluster JSON/Base64/timestamp |
+| 3 | Storage Unit Converter | `storage-unit-converter` | Bytes và các đơn vị SI/IEC; hiển thị nhiều kết quả cùng lúc | Hữu ích khi đọc disk usage, quota và backup; phạm vi nhỏ, ít bảo trì |
+| 4 | Hash & Checksum | `hash-checksum` | SHA-256/SHA-512 cho text hoặc file; đối chiếu expected checksum | Kiểm tra artifact/download/backup; kết quả trả lời trực tiếp khớp hay không |
+
+**Điều chỉnh sau khi xem Genie9:** Storage Unit Converter được đưa lên trước SQL Formatter. Hash bao gồm workflow kiểm tra file, không chỉ sinh một chuỗi hash. Đợt này không thêm backend, tài khoản, subscription hay third-party scripts vào tool pages.
+
+### 5.3 Next queue — công cụ sẽ làm tiếp
+
+**Trạng thái: ưu tiên tiếp theo, chưa triển khai; không gắn ETA hoặc yêu cầu hoàn thành đồng loạt.** Đánh giá lại theo phản hồi và dữ liệu tìm kiếm thực tế sau mỗi đợt.
+
+| Thứ tự | Tool | Phạm vi bản đầu / lý do |
+|---|---|---|
+| 1 | Upload / Restore Time Calculator | Dung lượng + tốc độ truyền + hiệu suất giả định → thời gian ước tính; phân biệt bits/bytes và SI/IEC. Dùng chung phép đổi đơn vị với Storage Converter |
+| 2 | SQL Formatter | Format query, chọn dialect được hỗ trợ rõ ràng; không thực thi SQL |
+| 3 | JSON ↔ CSV Converter | Chuyển hai chiều; header/delimiter rõ; preview bảng; giữ Unicode và ô có dấu phẩy/xuống dòng |
+| 4 | Regex Tester | JavaScript regex, flags, matches/groups, replace preview; chạy trong Worker có timeout |
+| 5 | IPv4 / CIDR Calculator | Network, mask, range và kiểm tra IP thuộc subnet; IPv6 để riêng |
+| 6 | chmod Calculator | Quyền Unix dạng checkbox ↔ octal ↔ symbolic; không chạy lệnh trên host |
+
+### 5.4 Later shortlist — đã sàng lọc, chưa lên lịch
+
+| Tool | Hướng xem xét |
 |---|---|
-| JSON & Data | JSON Diff; YAML ↔ JSON; CSV ↔ JSON; JSON Minifier; JSONPath Tester; JSON to Markdown Table; JSON Lines ↔ JSON Array |
-| Text & Comparison | Regex Tester; Word/Character Counter; Remove Duplicate Lines; Sort Lines; Text Case Converter; Whitespace Cleaner |
-| Encode & Decode | JWT Decoder; HTML Entity Encoder/Decoder; Base64URL; Hex/Text Converter; SHA Hash Generator (non-password hashing) |
-| Time & Scheduling | Date Difference Calculator; Timezone Converter; Cron Execution Preview; Working Days Calculator |
-| Web & Frontend | Query String Parser; Color Contrast Checker; HTML Formatter; Markdown Preview |
+| Text Utilities | Gộp case conversion, sort/deduplicate lines, đếm words/characters và cleanup; không tách mỗi thao tác thành một trang |
+| HTML Escape / Unescape | Encode/decode HTML entities; output luôn là text, không thực thi markup |
+| QR Code Generator | QR tĩnh cho URL, text, Wi-Fi; export PNG/SVG; không dịch vụ redirect hoặc tracking |
+| JSON Diff | Structured differences; tách rõ với Text Compare, quy định semantics của array/key order |
+| Backup Storage Calculator | Source size, change rate, retention; công khai giả định compression/dedup và giới hạn mô hình |
 
-### 5.3 P2 long-term feature backlog — ý tưởng, chưa ưu tiên
+### 5.5 Other ideas — chưa chọn
 
-| Category | Ideas |
-|---|---|
-| Data utilities | XML Formatter, XML ↔ JSON, CSV Cleaner, CSV Deduplicator, TSV ↔ CSV, SQL Formatter, SQL Minifier, JSON Schema Validator, Mock Data Generator, JSON to TypeScript, Diff CSV |
-| Text tools | Line Numbering, Join/Split Lines, Find & Replace, Slug Generator, Markdown Table Generator, Text Statistics, Lorem Ipsum, Unicode Inspector |
-| Generators | ULID Generator, Random String Generator, QR Code Generator, Barcode Generator, HMAC Generator, Nano ID (nếu phân biệt rõ), Color Palette Generator |
-| Time / scheduling | Cron Dialect Converter (Unix/Quartz/AWS rõ ràng), Date Format Converter, Epoch microseconds/nanoseconds, Timezone Difference, Countdown/Duration Calculator |
-| Image / web | Favicon Generator, Open Graph Preview, Image Resize, WebP/AVIF Converter, EXIF Viewer/Remover, Robots.txt Tester, Meta Tag Preview, CSS Minifier |
-| Network / system | CIDR Calculator, Subnet Range / Overlap Checker, IPv4 ↔ Integer, IPv6 Expander/Compressor, Bandwidth Transfer Time, Chmod Calculator, PEM/Certificate Decoder |
-| Reference tools | Cron Cheat Sheet, HTTP Status Codes, Regex Cheat Sheet, Git Commands, Markdown Syntax, ASCII Table, Common MIME Types |
+- **Data:** XML Formatter, XML ↔ JSON, CSV Cleaner/Deduplicator, TSV ↔ CSV, JSONPath, JSON Schema, JSON Lines ↔ Array, JSON to Markdown/TypeScript, Mock Data, Diff CSV.
+- **Text:** Join/Split Lines, Find & Replace, Slug Generator, Markdown Table, Lorem Ipsum, Unicode Inspector.
+- **Encoding / generators:** Hex/Text, Number Base Converter (một tool cho nhiều cơ số), ULID, random string, barcode, HMAC, Nano ID.
+- **Time:** Date Difference, Timezone Converter, Working Days, Duration, Unix/Quartz/AWS cron dialects, epoch microseconds/nanoseconds.
+- **Web / images:** Query String Parser, Markdown Preview, Color Contrast, HTML Formatter, CSS Minifier, favicon, image resize/convert, EXIF, Open Graph/Meta Preview, Robots.txt Tester.
+- **Network / references:** Subnet Overlap, IPv4 ↔ Integer, IPv6 utilities, PEM/Certificate Decoder, HTTP Status Codes, Cron/Regex/Git cheat sheets, MIME/ASCII tables.
 
-Không chọn tool chỉ vì một thư viện open-source có sẵn; mỗi candidate cần một search intent, user value, chất lượng output và cost/competition case hợp lý.
+Không đưa PDF/video/Office processing, image editor đầy đủ, playground, health/fun calculators hoặc các network probes cần backend vào đợt mở rộng này. Các hướng đó cần một quyết định phạm vi riêng.
 
-## 6. Functional Specification — 8 launch candidates
+### 5.6 Scope rules và bằng chứng lựa chọn
 
-Một trang tool phải hoạt động được **không cần đăng nhập** và có input sample để thử ngay. Các input không được gửi tới analytics, log hoặc server trừ khi người dùng chủ động sử dụng một tính năng backend đã được giải thích rõ (không có trong launch scope).
+- Một tác vụ có nhiều chế độ dùng một tool: encode/decode, JSON format/minify/validate, YAML ↔ JSON, JSON ↔ CSV và các thuật toán hash không tự động thành nhiều route.
+- JSON Minifier, Base64URL và Cron Execution Preview đã nằm trong tools hiện có; không đếm lại thành backlog mới.
+- Input/output của mọi tool chạy trong browser memory; không upload, gọi `/api/*`, log hoặc lưu payload vào URL/web storage. Chỉ theme, sidebar và favorite IDs được lưu theo quy tắc hiện tại.
+- Chỉ publish tool có implementation và kiểm tra tương ứng; registry runtime vẫn chỉ liệt kê các tool hoạt động.
+- Mỗi tool mới có hướng dẫn tiếng Anh và tiếng Việt theo quy tắc repo, ví dụ có thể chạy, giới hạn chính xác và related tools theo tác vụ.
+- Chưa có search volume, KD, traffic hoặc conversion data xác thực cho các tool mới. Không lấy số GitHub stars, nhãn “Popular/Most Used” hoặc số tool của đối thủ làm bằng chứng thứ hạng nhu cầu.
+
+**Nguồn nghiên cứu đọc ngày 2026-10-26:**
+
+| Nguồn | Dùng để quyết định | Giới hạn |
+|---|---|---|
+| [DevToys](https://github.com/DevToys-app/DevToys) và [tool registry IT-Tools](https://github.com/CorentinTh/it-tools/blob/main/src/tools/index.ts) | Đối chiếu độ phủ các nhóm tác vụ dev/DevOps | Catalog không phải số lượt dùng từng tool hoặc keyword volume |
+| [Genie9 Workspace](https://genie9.com/workspace), [Storage Converter](https://genie9.com/workspace/converter/storage-converter), [File Checksum](https://genie9.com/workspace/security/file-checksum) | Đẩy Storage lên đợt đầu; chọn workflow file + expected checksum và cụm storage → transfer time → checksum | Chưa kiểm chứng toàn bộ thuật toán hoặc hành vi network; trang chi tiết Upload/Restore Time chưa tải được qua trình đọc web, mới đọc mô tả catalog |
+| [NIST binary prefixes](https://pml.nist.gov/cuu/Units/binary.html) | Phân biệt GB/MB với GiB/MiB trong Storage và Transfer Time | Khi triển khai cần test vectors cho từng đơn vị; không dùng nhãn “GB = 1024 MB” |
+
+## 6. Functional Specification — core tools và các đợt mở rộng
+
+Một trang tool phải hoạt động được **không cần đăng nhập** và có input sample để thử ngay. Input/output không gửi tới analytics, log, server hoặc `/api/*`. T01–T08 là đặc tả core; không dùng danh sách tính năng mong muốn dưới đây để suy ra mọi extension đã được triển khai. Phạm vi hiện có và thứ tự mở rộng theo §5.
 
 ### T01 — Text Compare / Diff
 
@@ -321,16 +365,23 @@ Một trang tool phải hoạt động được **không cần đăng nhập** v
 - **Acceptance samples:** RFC-compliant UUID v4 format, valid version/variant bits, copy output, bulk limit.
 - **P2:** UUID v7/ULID chỉ sau khi tests, specs và search intent rõ.
 
-### 6.1 P1 candidate specifications — cần kiểm tra trước khi triển khai
+### 6.1 Expansion requirements — theo thứ tự tại §5
 
-| Tool | Must-have nếu chọn | Cạm bẫy cần tránh |
+Bốn tool đầu của bảng đã có implementation theo §5.2; sáu tool tiếp theo vẫn là yêu cầu cho hàng đợi §5.3. Không suy ra các mục backlog còn lại đã triển khai.
+
+| Tool | Must-have bản đầu | Giới hạn / tính đúng đắn |
 |---|---|---|
-| JWT Decoder | Decode header/payload locally; exp/iat/nbf readable; no secrets retention | **Decode ≠ signature verification**, không trình bày token chưa verify là đáng tin |
-| JSON Diff | Side-by-side + structured differences; modes rõ | Array order vs set semantics, duplicate keys |
-| YAML ↔ JSON Converter | Safe parsing, parse error, convert + copy | Unsafe tags, aliases, size limits; không execute YAML |
-| Regex Tester | Pattern + flags + sample text + match highlighting | ReDoS/regex freeze → worker/timeout; define ECMAScript flavor |
-| CSV Cleaner | Preview, delimiter/header options, deduplicate | File encodings, quoted commas, multiline cells, dữ liệu nhạy cảm |
-| CIDR Calculator | Subnet/network/broadcast/range, IPv4 v1 | Network math edge cases, IPv6 separate requirements |
+| YAML ↔ JSON Converter | Safe parsing, lỗi có vị trí, chuyển hai chiều, copy/download | Không execute tags; giới hạn alias expansion, nesting và input; nêu rõ comment/anchor/type không round-trip nguyên vẹn |
+| JWT Decoder | Header/payload local; `exp`/`iat`/`nbf` dễ đọc; không lưu token | Decode không verify signature; không tự fetch JWKS; không kết luận token đáng tin từ nội dung decode |
+| Storage Unit Converter | Bytes, kB/MB/GB/TB và KiB/MiB/GiB/TiB; nhiều output đồng thời | SI theo 1000, IEC theo 1024; reject giá trị không hợp lệ; precision và rounding rõ |
+| Hash & Checksum | Text/file, SHA-256/SHA-512, copy và expected-hash comparison | Giới hạn bộ nhớ/file size rõ; dùng reference vectors; hash không phải password hashing; checksum match không tự chứng minh nguồn gốc file |
+| Upload / Restore Time Calculator | Dung lượng, bandwidth, efficiency; thời gian lý thuyết và ước tính | Phân biệt Mbps/MB/s; bandwidth > 0; 0 < efficiency ≤ 100%; không đo mạng hoặc hứa tốc độ thực tế |
+| SQL Formatter | Chọn dialect, format/copy, input giữ nguyên khi lỗi | Không thực thi query; không gọi DB; chỉ nhận dialect parser hỗ trợ |
+| JSON ↔ CSV Converter | Hai chiều, header/delimiter, preview, copy/download | Quoted commas/newlines, Unicode, kiểu dữ liệu/nested objects có quy tắc rõ; CSV formula injection trong output xuất cho spreadsheet phải được xử lý minh bạch |
+| Regex Tester | Pattern + flags + text, matches/groups, replace preview | ECMAScript flavor; Worker + timeout/terminate; giới hạn input để không treo UI |
+| IPv4 / CIDR Calculator | Network, mask, range, IP membership | `/0`, `/31`, `/32`, IPv4 invalid; không khái quát usable host count cho mọi môi trường/cloud |
+| chmod Calculator | Quyền owner/group/other ↔ octal ↔ symbolic | Bản đầu chỉ mode bits `000`–`777`; ACL và special bits chưa hỗ trợ; không chạy command |
+| Later shortlist | Tham khảo phạm vi §5.4 | Chưa khóa đặc tả hoặc thứ tự triển khai |
 
 ### 6.2 Shared Tool Shell — chức năng dùng chung
 
@@ -766,6 +817,8 @@ Decision: Test / Build / Defer / Reject
 
 ## 14. Delivery Roadmap — không ràng buộc thời gian
 
+**Baseline 2026-10-26:** 12 tools đã có implementation; trạng thái triển khai tools theo §5.1. Các phase dưới đây là khung phát hành/vận hành, không phải danh sách việc đều chưa làm. Thứ tự mở rộng catalog theo §5.2–§5.4; không suy ra public launch, keyword validation hoặc monetization đã hoàn tất.
+
 ### Phase 0 — Research & Scope Lock
 
 **Deliverables:** Candidate inventory, 8–12 SERP audits, competitor gap notes, final Wave 1 selection, privacy/ad decisions, content cluster plan.
@@ -775,7 +828,7 @@ Decision: Test / Build / Defer / Reject
 ### Phase 1 — Minimum Useful Site
 
 - Homepage, navigation, directory, categories phù hợp, simple search, footer/trust pages.
-- Tool shell + **4–6 tools đầu tiên** từ P0 tùy kết quả validation.
+- Tool shell và 8 tools core hiện có tại §5.1; review khả năng sẵn sàng public launch riêng với trạng thái implementation.
 - 3–5 bài blog hữu ích gắn với core tool clusters (số lượng không phải SEO requirement).
 - Responsive design, accessibility baseline, technical SEO, analytics và privacy baseline.
 - Initial legal/policy review; không cần bật ads ngay nếu chưa đủ điều kiện.
@@ -784,7 +837,8 @@ Decision: Test / Build / Defer / Reject
 
 ### Phase 2 — Content + Tool Expansion
 
-- Mở rộng lên **8–12 core tools** đã validation, thay vì cố hoàn thành mọi P1.
+- **Đã triển khai 12 tools**: 8 tools core và đợt mở rộng §5.2 gồm YAML ↔ JSON, JWT Decoder, Storage Unit Converter, Hash & Checksum. Đợt mở rộng có 4 hướng dẫn đủ bản Anh/Việt.
+- Sau đó đánh giá hàng đợi §5.3, bắt đầu với Upload / Restore Time; không coi tổng số tool là quota hoặc thứ hạng SEO.
 - Viết supporting guides thật sự trả lời search intent, thêm relevant internal links.
 - Favorites và command search tối ưu dựa trên feedback.
 - Theo dõi indexation và traffic theo từng landing page, không chỉ site aggregate.
@@ -867,7 +921,7 @@ Decision: Test / Build / Defer / Reject
 
 1. `infratrove.com` đã đăng ký thành công, đã kiểm tra trademark và social handles chưa?
 2. Có keyword clusters nào thực sự accessible cho domain mới? (Chưa đo.)
-3. Trong 8 P0 candidates, 4–6 tool nào là Wave 1 tốt nhất dựa trên search intent và SERP audit?
+3. Đợt tại §5.2 đã triển khai theo độ phù hợp sản phẩm; keyword/SERP evidence nào xác nhận hoặc yêu cầu điều chỉnh thứ tự sau mỗi đợt?
 4. Có cần dark mode trong launch hay để phase 1.5?
 5. Chọn tool editor nhẹ hay code editor nâng cao cho JSON/diff?
 6. Launch chỉ tiếng Anh hay có lý do thực sự để hỗ trợ đa ngôn ngữ về sau?
@@ -876,17 +930,17 @@ Decision: Test / Build / Defer / Reject
 9. Tool content viết bởi founder hay cần editorial workflow hỗ trợ?
 10. Có cần logo/icon design system riêng trước launch, hay dùng wordmark đơn giản?
 
-## 18. Suggested First Deliverables (chưa code)
+## 18. Research & Scope Deliverables
 
-1. **Keyword & SERP Research Sheet:** 30–50 query candidates của 8 P0 tools + blog topics; ghi country/date/source, intent, SERP, confidence.
+1. **Keyword & SERP Research Sheet:** Core tools hiện có và 4 tools tại §5.2 + blog topics; ghi country/date/source, intent, SERP, confidence; dữ liệu chưa đo giữ trạng thái UNKNOWN.
 2. **Competitor UX Comparison:** Text Compare, JSON Formatter, Cron Generator, Password Generator (cùng test inputs).
 3. **Low-fidelity Wireframes:** Homepage, directory, standard tool page, mobile tool page, blog page.
 4. **Design Prototype:** Một tool shell và component tokens được review về accessibility/Ads placement trước triển khai hàng loạt.
-5. **Final Wave 1 Scope:** Chỉ khóa 4–6 tools sau khi hoàn tất evidence review.
+5. **Next Tool Batch:** Hàng đợi §5.3, bắt đầu với Upload / Restore Time; không đồng nhất implementation đã có với cơ hội SEO đã xác thực.
 
 ## 19. Source-of-truth & update policy
 
-- Tài liệu này là **product spec** được xây dựng từ các quyết định trong dự án InfraTrove tính tới **2026-10-24**.
+- Tài liệu này là **product spec** được xây dựng từ các quyết định trong dự án InfraTrove tính tới **2026-10-26**; §5 là nguồn chính cho trạng thái catalog và thứ tự tools sẽ làm.
 - Các công thức, kỳ vọng traffic, Page RPM và timeline nếu nhắc đến là **scenarios/assumptions**, không phải kết quả đo thực tế.
 - Keyword research/competitor findings nên ở artifact riêng, có source URLs, capture date, geo và confidence, sau đó liên kết vào version tiếp theo của spec.
 - Mỗi thay đổi phạm vi lớn (ví dụ thêm SaaS, backend data processing, pivot sang general calculators) phải có decision log mới để tránh scope creep.
