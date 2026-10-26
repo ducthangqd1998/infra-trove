@@ -5,6 +5,7 @@ import '../styles/global.css';
 import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 import geistVietnamese from '@fontsource-variable/geist/files/geist-vietnamese-wght-normal.woff2?url';
 import Icon from '../components/Icon.astro';
+import BrandLogo from '../components/BrandLogo.astro';
 import { tools } from '../data/tools';
 interface Props {
   title: string;
@@ -130,7 +131,7 @@ const shareImage = image
       <div class="container header-inner">
         <a class="brand" href="/" aria-label="InfraTrove home">
           <span class="brand-mark" aria-hidden="true">
-            <Icon name="layers" size={18} />
+            <BrandLogo size={18} />
           </span>
           InfraTrove
         </a>
@@ -214,7 +215,7 @@ const shareImage = image
         <div class="footer-brand">
           <a class="brand" href="/">
             <span class="brand-mark" aria-hidden="true">
-              <Icon name="layers" size={18} />
+              <BrandLogo size={18} />
             </span>
             InfraTrove
           </a>

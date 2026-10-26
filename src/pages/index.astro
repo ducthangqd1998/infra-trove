@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Directory from '../components/Directory.astro';
 import PostCard from '../components/PostCard.astro';
 import Icon from '../components/Icon.astro';
+import BrandLogo from '../components/BrandLogo.astro';
 import { getPosts } from '../lib/blog';
 
 const posts = (await getPosts('en')).slice(0, 3);
@@ -95,7 +96,7 @@ const pixels = heights.flatMap((height, c) =>
           <div class="dash-side">
             <div class="dash-brand">
               <span class="brand-mark">
-                <Icon name="layers" size={12} />
+                <BrandLogo size={12} />
               </span>
               infratrove
             </div>
