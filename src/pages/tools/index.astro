@@ -9,23 +9,33 @@ import Icon from '../../components/Icon.astro';
   description="Browse free tools for text, JSON, encoding, passwords and scheduling. Search by task, filter by category or return to your favorites."
 >
   <div class="container page-section tool-index">
-    <header class="tool-index-intro banner">
-      <div>
-        <div class="eyebrow">The tool index</div>
-        <h1>A tool for the little things.</h1>
-        <p class="page-intro">Find the right tool. Finish the little things.</p>
+    <header class="tool-index-intro">
+      <div class="eyebrow">
+        <span class="status-dot"></span> In-browser Developer Suite
       </div>
-      <div class="hero-search">
-        <label for="tool-search">Search tools</label>
-        <div class="search-control">
-          <Icon name="search" />
+      <h1>
+        All developer tools<span class="hero-accent">.</span>
+      </h1>
+      <p class="page-intro">
+        Fast, zero-telemetry utilities running directly in your browser memory.
+      </p>
+      <div class="tool-spotlight-wrap">
+        <label for="tool-search" class="sr-only">
+          Search tools
+        </label>
+        <div class="spotlight-search">
+          <Icon name="search" size={20} class="spotlight-icon" />
           <input
             id="tool-search"
+            class="spotlight-input"
             type="search"
-            placeholder="Search tools, tasks or formats…"
+            placeholder="Search tools, tasks or formats (e.g. 'json', 'diff', 'base64', 'cron')…"
             autocomplete="off"
+            spellcheck="false"
           />
-          <kbd>⌘ K</kbd>
+          <kbd class="spotlight-kbd" aria-hidden="true">
+            ⌘ K
+          </kbd>
         </div>
       </div>
     </header>

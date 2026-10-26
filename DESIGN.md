@@ -326,8 +326,8 @@ first paint.
   input edges and the selected segment ring (3:1, WCAG 1.4.11).
 - **Error, added-\*, removed-\*:** status. Always paired with words or signs (`+`/`-`), never colour
   alone.
-- **Heat-1/2/3 (amber, orange, red):** decorative pixel charts only. Low rows amber, mid orange,
-  top red. Never used as status colours.
+- **Heat-1/2/3 (amber, orange, red):** reserved for decorative heat scales. Never used as status
+  colours; the home directory does not use charts.
 - **Band-from / band-to:** the only gradient that carries text (CTA band, guide covers), with
   `on-band` white text at 6.5:1 or more. Guide covers use three dark warm pairs in
   `.cover[data-tone]` (amber-700 to orange-700, orange-700 to red-700, amber-800 to orange-800).
@@ -337,15 +337,15 @@ first paint.
 One family, **Geist Variable**, with **Geist Mono Variable** for code, tool symbols and the cron
 field. Weights 400, 500 and 600 only.
 
-- **display-lg:** home hero only; `clamp(2.5rem, 4.8vw, 3.75rem)`, the token is the max.
+- **display-lg:** reserved for display headings; the home directory uses a compact
+  `clamp(2rem, 3vw, 2.5rem)` heading so tools stay near the top.
 - **headline-lg:** page `h1`; `clamp(2rem, 4vw, 3rem)`.
 - **headline-md:** section `h2`; `clamp(1.375rem, 2.2vw, 1.75rem)`.
 - **title-md:** card titles (`h3`).
 - **body-lg / body-md / body-prose:** intros, body text, guide articles (looser line height).
 - **label-md:** buttons, nav, tabs, form labels.
 - **caption-md:** badges, tags, metadata, footers of cards.
-- **label-group:** uppercase sidebar group labels and dashboard-mock group labels. This is the only
-  uppercase text in the product.
+- **label-group:** uppercase sidebar group labels. This is the only uppercase text in the product.
 - **code-md:** editors, `pre`, inline code (inline code renders at 0.875em).
 
 Text is never smaller than 11px (0.6875rem). Inputs and textareas use 16px on screens up to 767px
@@ -356,15 +356,17 @@ so iOS does not zoom.
 - Container max 1280px, side padding 2rem, 1rem at 767px and below. Tool pages are an app shell and
   use `--shell-max` (120rem, 1920px) instead, header and footer included so every edge lines up;
   guides, the home page and the other pages keep 1280px. The tool work area is the container minus
-  the 15rem sidebar and a gap: 944px at 1280px, 1384px at 1720px.
-- Breakpoints: 1200px (tool directory goes to 4 columns), 1100px (hero stacks), 1023px (tool sidebar
-  hides, guide TOC moves above the article), 899px (feature cards stack), 767px (mobile: header menu
-  drawer, one column, touch targets 44px).
+  the 15rem sidebar and a 1rem gap: 960px at 1280px, 1400px at 1720px.
+- Breakpoints: 1200px (tool directory uses an adaptive grid with a 16rem minimum, normally 4
+  columns; enlarged text reduces the column count), 1100px (tool grid goes to 2 columns),
+  1023px (tool sidebar hides, guide TOC moves above the article), 899px (home intro stacks),
+  767px (mobile: header menu drawer, one column, touch targets 44px).
 - Spacing scale `s1`…`s8` (4px to 64px). Card padding `s5`; gaps between cards `s4`.
 - **Tool pages:** app shell. A 15rem sticky sidebar groups tools by category; a button in the tool
   header collapses it (saved in `localStorage["infratrove-sidebar"]`, applied before first paint).
-  The tool column is task-first: a compact header (symbol tile, breadcrumb, `h1` at 1.5rem, Save;
-  summary and privacy pill on one row below), then the workspace card, then guide panels and related
+  The tool column is task-first: a compact header with an SVG symbol tile, category breadcrumb,
+  `h1` at 1.375rem and tool description on the left; privacy pill and Save button on the right, all
+  aligned without skeuomorphic 3D avatars. Then the workspace card, then guide panels and related
   tools. Nothing above the workspace repeats the tool name.
   Each tool declares a `layout` in `src/data/tools.ts`. `editors` tools (JSON, Text Compare, Base64,
   URL) give the whole row to the workspace; the guide panels and related tools stay below. `panel`
@@ -373,19 +375,22 @@ so iOS does not zoom.
   so both columns end together and no side of the page stays empty. Below 1600px the panels stay
   below the card, as on every tool under 1024px.
 - **Guides:** article column up to 46rem plus a 16rem sticky "On this page" panel.
-- **Home:** hero (copy left, tilted dashboard mock right), tool directory, "How every tool works"
-  flow, three feature cards, latest guides.
+- **Home:** a utility directory. Compact title and task description on the left, labelled search
+  on the right, stacked below 900px. A plain line explains that no account is needed and tool input
+  stays in the browser. Category filters, Favorites and tool cards follow immediately; latest
+  guides sit below a hairline divider. No promotional hero, dashboard mock, feature grid or CTA
+  band. Keep `tool-search` and the legacy `flow-title` anchor on the privacy line.
 
 ## Elevation & Depth
 
 Flat. Cards separate by a 1px hairline edge on the warm canvas, not by shadow. Shadows only on
-layers that float: select menus, the mobile drawer, the hero dashboard mock and its chip. The hero
-mock is the one place with 3D (`rotateY(-9deg) rotateX(4deg)`); it flattens below 1100px.
+layers that float: select menus and the mobile drawer. No perspective or 3D decoration on the home
+directory.
 
 ## Shapes
 
 - `lg` (16px): cards, panels, banners, CTA band.
-- `tile` (12px): icon tiles, dashboard mock cards, flow nodes.
+- `tile` (12px): icon tiles.
 - `sm` (10px): buttons, inputs, selects, sidebar items.
 - `tag` (6px) and `xs` (6px): tags such as the category label on a card, kbd keys.
 - `pill`: badges and the eyebrow only.
@@ -406,13 +411,11 @@ mock is the one place with 3D (`rotateY(-9deg) rotateX(4deg)`); it flattens belo
   orange bar on the left. Group labels use `label-group`.
 - **Banner** (tools index and guide index headers): surface card with concentric hairline arcs on the
   right.
-- **Flow diagram:** dashed track on the canvas, nodes as tiles, dashed arrows; the active node is
-  orange-edged on `soft`; a hatched dashed node marks something that is not used (the server).
 - **Workspace** (tool UI): one card. A single dense `tool-bar` row on top (primary action first,
   then options, then Load example and Clear pushed right; 40px controls, 44px on mobile), then the
   work area. Each tool's layout follows its main job, not a shared template:
   - Text tools (Text Compare, JSON, Base64, URL): two tall editors side by side, height
-    `clamp(20rem, 100dvh - 20rem, 46rem)`, resizable. Editors show a header (label, line and
+    `clamp(16rem, 100dvh - 28rem, 40rem)`, resizable. Editors show a header (label, line and
     character count, actions such as Copy) and, for code-like text, a line-number gutter with no
     soft wrap. Input is surface, read-only output is `code`. Ctrl or Cmd + Enter runs the action.
   - Live tools (Base64, URL, Cron, Timestamp, JSON validity): results update as you type; errors
@@ -440,13 +443,13 @@ mock is the one place with 3D (`rotateY(-9deg) rotateX(4deg)`); it flattens belo
 - Do keep warmth in the canvas, the orange accent and the heat scale. Don't add blue, indigo or
   purple.
 - Do put dark text on orange fills. Don't put white text on orange.
-- Do use gradients only for the hero glow, guide covers and the CTA band. Don't put text on a
+- Do use gradients only for guide covers, tool icon tiles and the CTA band. Don't put text on a
   gradient other than the dark band and cover pairs.
 - Do frame cards with hairlines. Don't add shadows to static cards.
 - Do use uppercase only for sidebar group labels. Don't uppercase headings, eyebrows or buttons.
 - Do give every selected, current or pressed state a cue of at least 3:1 (underline, bar, ring), not
   a tint alone.
 - Do keep one primary button per region.
-- Do keep the hero dashboard mock, flow diagram and pixel chart decorative (`aria-hidden`) and true
-  to the product (no invented metrics or users).
+- Do put real tools before explanatory content on the home directory. Don't add decorative
+  dashboards, charts or invented metrics and users.
 - Don't hard-code colours in components; add a token to `:root` and to this file.

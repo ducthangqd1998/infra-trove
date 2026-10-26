@@ -5,7 +5,9 @@ test('mobile menu, segmented options and cron presets', async ({
 }) => {
   await page.goto('/');
   if (isMobile) {
-    const menu = page.getByRole('button', { name: 'Menu', exact: true });
+    const menu = page
+      .getByRole('banner')
+      .getByRole('button', { name: 'Menu', exact: true });
     await menu.click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.keyboard.press('Escape');
@@ -31,17 +33,17 @@ test('mobile menu, segmented options and cron presets', async ({
 test('directory search, categories and persisted favorites', async ({
   page,
 }) => {
-  await page.goto('/');
-  await page.getByRole('searchbox', { name: 'Search tools' }).fill('json');
-  await expect(page.locator('[data-tool-card]:visible')).toHaveCount(1);
-  await page.locator('[data-tool-card]:visible').click();
-  await expect(page).toHaveURL(/json-formatter/);
-  await page.getByRole('button', { name: 'Save tool' }).click();
   await page.goto('/tools/');
-  await page.getByRole('button', { name: 'Favorites' }).click();
+  await page
+    .getByRole('searchbox', { name: 'Search tools' })
+    .fill('json formatter');
+  await expect(page.locator('[data-tool-card]:visible')).toHaveCount(1);
+  await page.locator('[data-fav-btn="json-formatter"]').click();
+  await page.goto('/tools/');
+  await page.getByRole('button', { name: 'Favorites', exact: true }).click();
   await expect(page.locator('[data-tool-card]:visible')).toHaveCount(1);
   await page.getByRole('button', { name: 'Generators', exact: true }).click();
-  await expect(page.locator('[data-tool-card]:visible')).toHaveCount(2);
+  await expect(page.locator('[data-tool-card]:visible')).toHaveCount(3);
 });
 test('JSON validates, preserves invalid input, copies and clears', async ({
   page,
@@ -177,12 +179,12 @@ test('keyboard search and HTML without JavaScript', async ({
   page,
   browser,
 }) => {
-  await page.goto('/');
+  await page.goto('/tools/');
   await page.keyboard.press('Control+k');
   await expect(page.getByRole('searchbox')).toBeFocused();
   const context = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await context.newPage();
-  await staticPage.goto('http://127.0.0.1:4321/tools/json-formatter/');
+  await staticPage.goto(new URL('/tools/json-formatter/', page.url()).href);
   await expect(staticPage.getByRole('heading', { level: 1 })).toContainText(
     'JSON Formatter',
   );
@@ -214,11 +216,11 @@ test('guide index lists each language and filters by category', async ({
   page,
 }) => {
   await page.goto('/blog/');
-  await expect(page.locator('[data-post]')).toHaveCount(3);
+  await expect(page.locator('[data-post]')).toHaveCount(7);
   await page.getByRole('button', { name: 'Text & data' }).click();
-  await expect(page.locator('[data-post]:visible')).toHaveCount(1);
-  await page.getByRole('button', { name: 'All', exact: true }).click();
   await expect(page.locator('[data-post]:visible')).toHaveCount(3);
+  await page.getByRole('button', { name: 'All', exact: true }).click();
+  await expect(page.locator('[data-post]:visible')).toHaveCount(7);
   await page
     .getByRole('navigation', { name: 'Guide language' })
     .getByRole('link', { name: 'Tiếng Việt' })
@@ -227,7 +229,7 @@ test('guide index lists each language and filters by category', async ({
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Hướng dẫn thực hành',
   );
-  await expect(page.locator('[data-post]')).toHaveCount(3);
+  await expect(page.locator('[data-post]')).toHaveCount(7);
 });
 test('guide contents link jumps to its heading and the tool CTA works', async ({
   page,
@@ -316,7 +318,9 @@ test('wide screens use the width: panel tools get a guide rail, editors get the 
   expect(narrowWorkspace.width).toBeGreaterThan(1000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/tools/password-generator/');
-  expect((await box('.tool-workspace')).width).toBe(944);
+  const contentColumn = await box('.tool-page');
+  expect((await box('.tool-workspace')).width).toBe(contentColumn.width);
+  expect((await box('.tool-workspace')).x).toBe(contentColumn.x);
   expect(await noSidewaysScroll()).toBe(true);
   await page.goto('/blog/');
   expect((await box('.container')).width).toBeLessThanOrEqual(1280);
@@ -361,4 +365,22 @@ test('guide comments explain themselves when no API is running', async ({
   expect(
     requests.some((url) => url.includes('challenges.cloudflare.com')),
   ).toBe(false);
+});
+
+test('homepage renders workbench hero, dashboard mockup and directory', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'workbench.',
+  );
+  await expect(page.locator('.hero-visual')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'A shortcut for your next task.' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Guides & references' }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: 'Browse all tools' }).first().click();
+  await expect(page).toHaveURL(/\/tools\/?$/);
 });

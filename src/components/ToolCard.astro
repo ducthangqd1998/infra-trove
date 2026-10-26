@@ -19,7 +19,18 @@ const { tool } = Astro.props;
     <span class="tool-symbol" aria-hidden="true">
       <ToolIcon slug={tool.slug} size={24} />
     </span>
-    <span class="card-category">{tool.category}</span>
+    <div class="card-top-actions">
+      <span class="card-category">{tool.category}</span>
+      <button
+        type="button"
+        class="card-fav-btn"
+        data-fav-btn={tool.slug}
+        aria-label={`Save ${tool.shortTitle} to favorites`}
+        title="Save to favorites"
+      >
+        <Icon name="star" size={15} />
+      </button>
+    </div>
   </div>
   <div class="card-body">
     <h3>
@@ -28,9 +39,13 @@ const { tool } = Astro.props;
     <p>{tool.summary}</p>
   </div>
   <div class="card-foot">
-    <span class="card-tags">{tool.tags.slice(0, 2).join(' · ')}</span>
-    <span class="card-link">
-      Open tool <Icon name="arrow" size={16} />
+    <div class="card-tags">
+      {tool.tags.slice(0, 2).map((tag) => (
+        <span class="tag-pill">{tag}</span>
+      ))}
+    </div>
+    <span class="card-link" aria-hidden="true">
+      Open tool <Icon name="arrow" size={15} />
     </span>
   </div>
 </article>

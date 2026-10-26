@@ -1,14 +1,35 @@
 import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
+try {
+  process.loadEnvFile?.();
+} catch {}
 const indexable = process.env.PUBLIC_INDEXABLE === 'true';
 const files = await readdir('dist', { recursive: true });
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
-assert(htmlFiles.length >= 23, 'Expected site, tool and guide pages');
+assert(
+  htmlFiles.length >= 35,
+  'Expected site, 12 tools and 7 bilingual guides',
+);
 for (const page of [
   'blog/index.html',
   'vi/blog/index.html',
   'blog/unix-cron-basics/index.html',
   'vi/blog/unix-cron-basics/index.html',
+  ...[
+    'yaml-json-converter',
+    'jwt-decoder',
+    'storage-unit-converter',
+    'hash-checksum',
+  ].map((slug) => `tools/${slug}/index.html`),
+  ...[
+    'yaml-json-conversion',
+    'jwt-claims-without-verification',
+    'storage-units-gb-gib',
+    'verify-file-checksum',
+  ].flatMap((slug) => [
+    `blog/${slug}/index.html`,
+    `vi/blog/${slug}/index.html`,
+  ]),
 ])
   assert(files.includes(page), `Missing guide page ${page}`);
 for (const file of htmlFiles) {

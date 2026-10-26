@@ -135,7 +135,7 @@ export default function JsonFormatter() {
           tall
           lineNumbers
           wrap={false}
-          placeholder="Your formatted JSON appears here"
+          placeholder="Output appears here"
           actions={<CopyButton value={output} className="text-button small" />}
         />
       </div>

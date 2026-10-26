@@ -104,6 +104,7 @@ export default function PasswordGenerator() {
           </span>
           <span>
             <strong>{strength.label}</strong> · {strength.bits} bits of entropy
+            with these settings
           </span>
         </div>
       </div>

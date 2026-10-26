@@ -16,10 +16,10 @@ interface Props {
   post: Post;
   tone?: number;
 }
-const { post, tone = 0 } = Astro.props;
+const { post } = Astro.props;
 const lang = postLang(post);
 const t = blogText[lang];
-const tool = getTool(post.data.tool);
+const tool = post.data.tool ? getTool(post.data.tool) : null;
 const otherLang = lang === 'vi' ? 'en' : 'vi';
 const translation = await getTranslation(post);
 const translationHref = translation
@@ -27,58 +27,131 @@ const translationHref = translation
   : null;
 const { Content, headings } = await render(post);
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const siteUrl = Astro.site?.toString() || 'https://infratrove.com';
+const currentHref = postHref(lang, postSlug(post));
+const enSlug =
+  lang === 'en'
+    ? postSlug(post)
+    : translation
+      ? postSlug(translation)
+      : postSlug(post);
+const alternates =
+  translation && translationHref
+    ? [
+        { lang, path: currentHref },
+        { lang: otherLang, path: translationHref },
+        { lang: 'x-default', path: postHref('en', enSlug) },
+      ]
+    : [];
+
+const articleStructuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: post.data.title,
+    description: post.data.description,
+    inLanguage: lang,
+    image: new URL(tool?.artwork ?? '/favicon.svg', siteUrl).toString(),
+    datePublished: post.data.updated || '2026-10-24',
+    dateModified: post.data.updated || '2026-10-24',
+    author: {
+      '@type': 'Organization',
+      name: 'InfraTrove',
+      url: siteUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'InfraTrove',
+      url: siteUrl,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: t.indexTitle,
+        item: new URL(
+          lang === 'vi' ? '/vi/blog/' : '/blog/',
+          siteUrl,
+        ).toString(),
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.data.title,
+        item: new URL(currentHref, siteUrl).toString(),
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
-  title={`${post.data.title} · InfraTrove Guides`}
+  title={`${post.data.title} · InfraTrove Blog`}
   description={post.data.description}
   lang={lang}
   shell="reading"
+  image={tool?.artwork ?? '/favicon.svg'}
+  type="article"
+  alternates={alternates}
+  structuredData={articleStructuredData}
 >
   <article class="container post-article" lang={lang}>
     <header class="post-header">
-      <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href={lang === 'vi' ? '/vi/blog/' : '/blog/'}>{t.indexTitle}</a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{post.data.category}</span>
-      </nav>
-      <h1>{post.data.title}</h1>
-      <p class="lead">{post.data.description}</p>
-      <div class="post-meta-row">
-        <span class="badge">{post.data.category}</span>
-        <span>{post.data.readingTime}</span>
-        <span aria-hidden="true">·</span>
-        <a class="badge-tool" href={`/tools/${tool.slug}/`}>
-          <span>{tool.shortTitle}</span>
-          <Icon name="arrow" size={14} />
-        </a>
+      <div class="post-header-top">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href={lang === 'vi' ? '/vi/blog/' : '/blog/'}>{t.indexTitle}</a>
+          <span class="breadcrumb-sep" aria-hidden="true">
+            /
+          </span>
+          <span class="breadcrumb-current" aria-current="page">
+            {post.data.category}
+          </span>
+        </nav>
         {translationHref && (
           <a
-            class="text-link lang-switch"
+            class="lang-switch-chip"
             href={translationHref}
             hreflang={otherLang}
           >
-            <Icon name="globe" size={16} />
-            {t.translationLink}
+            <Icon name="globe" size={14} />
+            <span>{t.translationLink}</span>
           </a>
         )}
       </div>
+
+      <h1 class="post-title">{post.data.title}</h1>
+      <p class="post-lead">{post.data.description}</p>
+
+      <div class="post-meta">
+        <span class="meta-item">
+          <Icon name="clock" size={14} />
+          <span>{post.data.readingTime}</span>
+        </span>
+        {tool && (
+          <>
+            <span class="meta-dot" aria-hidden="true">
+              ·
+            </span>
+            <a class="meta-tool-link" href={`/tools/${tool.slug}/`}>
+              <span>Companion tool:</span>
+              <strong>{tool.shortTitle}</strong>
+              <Icon name="arrow-up-right" size={13} />
+            </a>
+          </>
+        )}
+      </div>
     </header>
-    <div
-      class="cover post-cover"
-      data-tone={(Math.max(tone, 0) % 3) + 1}
-      aria-hidden="true"
-    >
-      <span class="cover-symbol">
-        <img
-          src={`/images/tools/${tool.slug}.jpg`}
-          alt=""
-          class="cover-3d-img"
-          width="136"
-          height="136"
-        />
-      </span>
-    </div>
     <div class="post-layout">
       <div class="prose">
         <Content />
@@ -101,23 +174,25 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
         </aside>
       )}
     </div>
-    <footer class="post-footer">
-      <div class="cta-box">
-        <div>
-          <p class="cta-eyebrow">{tool.shortTitle}</p>
-          <h2>{t.ctaTitle}</h2>
-          <p>{t.ctaBody}</p>
+    {tool && (
+      <footer class="post-footer">
+        <div class="cta-band">
+          <div>
+            <p class="cta-eyebrow">{tool.shortTitle}</p>
+            <h2>{t.ctaTitle}</h2>
+            <p>{t.ctaBody}</p>
+          </div>
+          <a
+            class="button button-primary"
+            href={`/tools/${tool.slug}/`}
+            aria-label={`${t.ctaButton}: ${tool.shortTitle}`}
+          >
+            {t.ctaButton}
+            <Icon name="arrow" size={18} />
+          </a>
         </div>
-        <a
-          class="button button-primary"
-          href={`/tools/${tool.slug}/`}
-          aria-label={`${t.ctaButton}: ${tool.shortTitle}`}
-        >
-          {t.ctaButton}
-          <Icon name="arrow" size={18} />
-        </a>
-      </div>
-    </footer>
+      </footer>
+    )}
     <Comments post={post.id} lang={lang} />
   </article>
 </BaseLayout>

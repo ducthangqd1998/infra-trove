@@ -13,6 +13,49 @@ Base64 represents binary bytes as text. Base64URL uses a slightly different alph
 
 Standard Base64 uses letters, digits, `+` and `/`. Base64URL replaces `+` with `-` and `/` with `_`. Depending on the protocol, trailing `=` padding may be omitted in Base64URL.
 
+<div class="editorial-compare" aria-label="Compare Base64 and Base64URL">
+  <div class="compare-col compare-before">
+    <div class="compare-header">
+      <span class="compare-label">Traditional Standard</span>
+      <strong>Standard Base64</strong>
+    </div>
+    <div class="compare-pills">
+      <div class="compare-pill">
+        <span class="pill-badge">Chars 62 & 63</span>
+        <span><code>+</code> and <code>/</code></span>
+      </div>
+      <div class="compare-pill">
+        <span class="pill-badge">Trailing Padding</span>
+        <span>Requires <code>=</code></span>
+      </div>
+    </div>
+    <p class="compare-desc">Risk of collisions and escaping errors inside URL queries or file paths.</p>
+  </div>
+
+  <div class="compare-arrow" aria-hidden="true">
+    <span>replace</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </div>
+
+  <div class="compare-col compare-after">
+    <div class="compare-header">
+      <span class="compare-label">URL-Safe Standard</span>
+      <strong>Base64URL</strong>
+    </div>
+    <div class="compare-pills">
+      <div class="compare-pill">
+        <span class="pill-badge">Chars 62 & 63</span>
+        <span><code>-</code> and <code>_</code></span>
+      </div>
+      <div class="compare-pill">
+        <span class="pill-badge">Trailing Padding</span>
+        <span>Unpadded (no <code>=</code>)</span>
+      </div>
+    </div>
+    <p class="compare-desc">Safe for URL parameters, JWT tokens, and HTTP header values.</p>
+  </div>
+</div>
+
 For the same three bytes, the standard value `+/8=` becomes `-_8` in unpadded Base64URL. Those bytes are not valid UTF-8 text, so a text-only decoder should reject them rather than display misleading characters.
 
 ## Encode bytes, not abstract characters
@@ -35,6 +78,31 @@ InfraTrove's standard mode requires padding when needed. URL-safe mode accepts p
 ## Base64 is not a privacy feature
 
 Anyone who has the encoded text can decode it. Do not use Base64 as password protection. A decoded JWT payload is also not proof of a verified signature.
+
+<blockquote class="editorial-quote">
+  “A Base64 string carries zero cryptographic protection — anyone holding the payload can reverse it to plaintext instantly.”
+</blockquote>
+
+<div class="takeaways-box">
+  <div class="takeaways-title">3 core takeaways to remember</div>
+  <div class="takeaways-grid">
+    <div class="takeaway-item">
+      <span class="takeaway-num">01</span>
+      <strong class="takeaway-heading">URL-safe characters</strong>
+      <p>Replaces <code>+</code> and <code>/</code> with <code>-</code> and <code>_</code> so query strings never need percent-escaping.</p>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">02</span>
+      <strong class="takeaway-heading">Padding convention</strong>
+      <p>Standard Base64 pads to a multiple of 4 with <code>=</code>, whereas Base64URL typically omits padding entirely.</p>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">03</span>
+      <strong class="takeaway-heading">Encoding is not privacy</strong>
+      <p>Base64 is merely a byte representation format. Never treat it as encryption or password security.</p>
+    </div>
+  </div>
+</div>
 
 Try the [Base64 Encoder / Decoder](/tools/base64-encoder-decoder/) with a harmless sample. For percent-encoded URL parameters, use the [URL Encoder](/tools/url-encoder-decoder/) instead.
 

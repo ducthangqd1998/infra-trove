@@ -7,6 +7,8 @@ export const categories = [
 ] as const;
 export type Tool = {
   slug: string;
+  artwork?: string;
+  guide?: string;
   /**
    * `editors`: two editors side by side, so the workspace takes the whole row.
    * `panel`: one compact panel; from 1600px the guide panels sit beside it as a rail.
@@ -26,6 +28,7 @@ export type Tool = {
 export const tools: Tool[] = [
   {
     slug: 'json-formatter',
+    artwork: '/images/tools/json-formatter.jpg',
     layout: 'editors',
     title: 'JSON Formatter & Validator',
     shortTitle: 'JSON Formatter',
@@ -44,6 +47,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'text-compare',
+    artwork: '/images/tools/text-compare.jpg',
     layout: 'editors',
     title: 'Text Compare',
     shortTitle: 'Text Compare',
@@ -62,6 +66,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'cron-generator',
+    artwork: '/images/tools/cron-generator.jpg',
     layout: 'panel',
     title: 'Cron Expression Generator',
     shortTitle: 'Cron Generator',
@@ -80,6 +85,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'unix-timestamp-converter',
+    artwork: '/images/tools/unix-timestamp-converter.jpg',
     layout: 'panel',
     title: 'Unix Timestamp Converter',
     shortTitle: 'Unix Timestamp',
@@ -98,6 +104,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'password-generator',
+    artwork: '/images/tools/password-generator.jpg',
     layout: 'panel',
     title: 'Password Generator',
     shortTitle: 'Password Generator',
@@ -116,6 +123,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'base64-encoder-decoder',
+    artwork: '/images/tools/base64-encoder-decoder.jpg',
     layout: 'editors',
     title: 'Base64 Encoder / Decoder',
     shortTitle: 'Base64 Encoder',
@@ -134,6 +142,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'url-encoder-decoder',
+    artwork: '/images/tools/url-encoder-decoder.jpg',
     layout: 'editors',
     title: 'URL Encoder / Decoder',
     shortTitle: 'URL Encoder',
@@ -152,6 +161,7 @@ export const tools: Tool[] = [
   },
   {
     slug: 'uuid-generator',
+    artwork: '/images/tools/uuid-generator.jpg',
     layout: 'panel',
     title: 'UUID Generator',
     shortTitle: 'UUID Generator',
@@ -167,6 +177,96 @@ export const tools: Tool[] = [
     example: 'Format: xxxxxxxx-xxxx-4xxx-[89ab]xxx-xxxxxxxxxxxx',
     note: 'Uses crypto.randomUUID() in a secure browser context. UUID v4 provides random identifiers with a very low collision probability, not an absolute uniqueness guarantee. These identifiers are not intended as authentication secrets.',
     related: ['password-generator', 'json-formatter'],
+  },
+  {
+    slug: 'yaml-json-converter',
+    guide: 'yaml-json-conversion',
+    layout: 'editors',
+    title: 'YAML ↔ JSON Converter',
+    shortTitle: 'YAML ↔ JSON',
+    summary: 'Convert configuration between YAML and JSON with clear errors.',
+    category: 'Text & data',
+    symbol: 'YAML',
+    tags: ['YAML', 'JSON', 'config', 'Kubernetes'],
+    steps: [
+      'Choose YAML to JSON or JSON to YAML.',
+      'Paste your document and select Convert, or press Ctrl/Cmd + Enter.',
+      'Copy or download the result. Swap direction to convert it back.',
+    ],
+    example: 'name: demo-api\nreplicas: 3\nenabled: true',
+    note: 'One YAML 1.2 core document or JSON value. Maximum 100,000 input characters, 400,000 output characters, 50 nesting levels and 10,000 values. Aliases, merge keys, custom tags, non-string mapping keys, non-finite values and unsafe integers are rejected. Comments, anchors and original formatting are not preserved. JSON duplicate keys keep their last value.',
+    related: ['json-formatter', 'text-compare', 'base64-encoder-decoder'],
+  },
+  {
+    slug: 'jwt-decoder',
+    guide: 'jwt-claims-without-verification',
+    layout: 'editors',
+    title: 'JWT Decoder',
+    shortTitle: 'JWT Decoder',
+    summary: 'Inspect a JWT header, payload and time claims locally.',
+    category: 'Encode & decode',
+    symbol: 'JWT',
+    tags: ['JWT', 'token', 'claims', 'auth'],
+    steps: [
+      'Paste a three-part JWT or load the harmless example.',
+      'Inspect the header and payload; time claims are shown in UTC.',
+      'Copy the sections you need. Verify trust separately in your application.',
+    ],
+    example: 'exp: 0 → 1970-01-01T00:00:00.000Z',
+    note: 'Decodes compact three-part JWTs, including alg "none" with an empty signature. It does not verify signatures, issuer, audience or authorization. Encrypted JWE and detached/unencoded payloads are unsupported. Maximum 20,000 characters. Time claims must be numeric seconds. JSON duplicate keys keep their last value. Tokens are never stored or sent to a JWKS service.',
+    related: [
+      'base64-encoder-decoder',
+      'json-formatter',
+      'unix-timestamp-converter',
+    ],
+  },
+  {
+    slug: 'storage-unit-converter',
+    guide: 'storage-units-gb-gib',
+    layout: 'panel',
+    title: 'Storage Unit Converter',
+    shortTitle: 'Storage Converter',
+    summary: 'Convert bytes and storage sizes with explicit SI and IEC units.',
+    category: 'Text & data',
+    symbol: 'GB',
+    tags: ['bytes', 'GB', 'GiB', 'storage'],
+    steps: [
+      'Enter a non-negative decimal amount.',
+      'Choose the source unit. SI units use 1000; IEC units use 1024.',
+      'Read all conversions and copy an individual result.',
+    ],
+    example: '1 GB = 1000000000 bytes\n1 GiB = 1073741824 bytes',
+    note: 'Supports bytes through TB/TiB. Input accepts up to 40 whole digits and 18 fractional digits, without commas or exponent notation. Exact rational arithmetic avoids floating-point integer loss. Results round half up to 9 decimal places; smaller positive values are marked < 0.000000001. This converts storage bytes, not network bit rates.',
+    related: [
+      'hash-checksum',
+      'base64-encoder-decoder',
+      'unix-timestamp-converter',
+    ],
+  },
+  {
+    slug: 'hash-checksum',
+    guide: 'verify-file-checksum',
+    layout: 'panel',
+    title: 'Hash & Checksum',
+    shortTitle: 'Hash & Checksum',
+    summary:
+      'Hash text or a file and compare its SHA checksum without uploads.',
+    category: 'Generators',
+    symbol: 'SHA',
+    tags: ['SHA-256', 'SHA-512', 'checksum', 'file'],
+    steps: [
+      'Choose Text or File and select SHA-256 or SHA-512.',
+      'Enter text or choose a file up to 32 MiB, then select Calculate hash.',
+      'Copy the digest or paste an expected hexadecimal checksum to compare.',
+    ],
+    example:
+      'SHA-256 of abc:\nba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    note: 'Uses Web Crypto in HTTPS or localhost. Text is UTF-8 and whitespace is significant; empty strings and empty files are supported. Maximum 200,000 text characters or 32 MiB per file because the complete input is held in memory. Expected checksums ignore case and whitespace. A match establishes agreement with that checksum, not file safety or publisher authenticity. Not a password-hashing tool.',
+    related: [
+      'storage-unit-converter',
+      'password-generator',
+      'base64-encoder-decoder',
+    ],
   },
 ];
 export function getTool(slug: string): Tool {

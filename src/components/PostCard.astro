@@ -1,54 +1,69 @@
 ---
 import Icon from './Icon.astro';
+import ToolIcon from './ToolIcon.astro';
 import { getTool } from '../data/tools';
 import { blogText } from '../lib/i18n';
 import { postHref, postLang, postSlug, type Post } from '../lib/blog';
+
 interface Props {
   post: Post;
   tone?: number;
   featured?: boolean;
 }
-const { post, tone = 0, featured = false } = Astro.props;
+const { post, featured = false } = Astro.props;
 const lang = postLang(post);
 const t = blogText[lang];
-const tool = getTool(post.data.tool);
+const tool = post.data.tool ? getTool(post.data.tool) : null;
 const href = postHref(lang, postSlug(post));
 const Heading = featured ? 'h2' : 'h3';
 ---
 
 <article
-  class:list={[featured ? 'featured-post' : 'post-card']}
+  class:list={['post-card', featured && 'featured-post']}
   lang={lang}
   data-post
   data-category={post.data.category}
 >
-  <div class="cover" data-tone={(tone % 3) + 1} aria-hidden="true">
-    <span class="cover-symbol">
-      <img
-        src={`/images/tools/${tool.slug}.jpg`}
-        alt=""
-        class="cover-3d-img"
-        width={featured ? 112 : 68}
-        height={featured ? 112 : 68}
-        loading="lazy"
-      />
+  <div class="card-top">
+    <span class="tool-symbol" aria-hidden="true">
+      {tool ? (
+        <ToolIcon slug={tool.slug} size={featured ? 26 : 22} />
+      ) : (
+        <svg
+          class="tool-icon"
+          width={featured ? 26 : 22}
+          height={featured ? 26 : 22}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+          <path d="M6 6h10" />
+          <path d="M6 10h10" />
+        </svg>
+      )}
     </span>
-  </div>
-  <div class={featured ? 'featured-body' : 'post-card-body'}>
-    <div class="post-meta">
+    <div class="card-top-actions">
       {featured && <span class="badge">{t.featured}</span>}
-      <span class="badge">{post.data.category}</span>
+      <span class="card-category">{post.data.category}</span>
     </div>
+  </div>
+  <div class="card-body">
     <Heading>
       <a href={href}>{post.data.title}</a>
     </Heading>
     <p>{post.data.description}</p>
-    <div class="card-foot">
-      <span class="card-tags">{post.data.readingTime}</span>
-      <span class="card-link">
-        {t.openGuide}
-        <Icon name="arrow" size={16} />
-      </span>
+  </div>
+  <div class="card-foot">
+    <div class="card-tags">
+      <span class="tag-pill">{post.data.readingTime}</span>
     </div>
+    <span class="card-link">
+      {t.openGuide}
+      <Icon name="arrow" size={15} />
+    </span>
   </div>
 </article>

@@ -4,6 +4,10 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
+try {
+  process.loadEnvFile?.();
+} catch {}
+
 const indexable = process.env.PUBLIC_INDEXABLE === 'true';
 if (indexable && !process.env.SITE_URL)
   throw new Error('Indexable builds require SITE_URL.');

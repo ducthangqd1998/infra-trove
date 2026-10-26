@@ -23,7 +23,9 @@ import Icon from './Icon.astro';
       </button>
     </div>
     <span class="result-count" aria-live="polite">
-      <span id="tool-count">{tools.length}</span> tools
+      <span class="count-pill">
+        <span id="tool-count">{tools.length}</span> tools
+      </span>
     </span>
   </div>
   <div class="tool-grid">
@@ -31,9 +33,19 @@ import Icon from './Icon.astro';
       <ToolCard tool={tool} />
     ))}
   </div>
-  <p id="empty-results" class="empty-results" hidden>
-    No tools found. Try another search or save a tool as a favorite.
-  </p>
+  <div id="empty-results" class="empty-state-card" hidden>
+    <div class="empty-state-icon" aria-hidden="true">
+      <Icon name="search" size={26} />
+    </div>
+    <h3>No matching tools</h3>
+    <p>
+      We couldn't find any tool matching your search. Try another keyword or
+      reset the filter.
+    </p>
+    <button type="button" class="text-button" id="clear-search-btn">
+      Reset search
+    </button>
+  </div>
 </section>
 <script>
   let active = 'All tools';
@@ -41,14 +53,58 @@ import Icon from './Icon.astro';
     'tool-search',
   ) as HTMLInputElement | null;
   const cards = [...document.querySelectorAll<HTMLElement>('[data-tool-card]')];
-  function filter() {
-    let favorites: string[] = [];
+  function readFavorites(): string[] {
     try {
       const saved = JSON.parse(
         localStorage.getItem('infratrove-favorites') || '[]',
       );
-      if (Array.isArray(saved)) favorites = saved;
+      return Array.isArray(saved)
+        ? saved.filter((x) => typeof x === 'string')
+        : [];
+    } catch {
+      return [];
+    }
+  }
+  function writeFavorites(favs: string[]) {
+    try {
+      localStorage.setItem('infratrove-favorites', JSON.stringify(favs));
     } catch {}
+  }
+  function syncFavoriteButtons() {
+    const favs = readFavorites();
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-fav-btn]')
+      .forEach((btn) => {
+        const slug = btn.dataset.favBtn || '';
+        const isFav = favs.includes(slug);
+        btn.setAttribute('aria-pressed', String(isFav));
+        btn.classList.toggle('is-favorite', isFav);
+        btn.setAttribute(
+          'title',
+          isFav ? 'Remove from favorites' : 'Save to favorites',
+        );
+      });
+  }
+  syncFavoriteButtons();
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-fav-btn]')
+    .forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const slug = btn.dataset.favBtn || '';
+        if (!slug) return;
+        const favs = readFavorites();
+        const next = favs.includes(slug)
+          ? favs.filter((s) => s !== slug)
+          : [...favs, slug];
+        writeFavorites(next);
+        syncFavoriteButtons();
+        if (active === 'Favorites') filter();
+      });
+    });
+  function filter() {
+    const favorites = readFavorites();
     const query = input?.value.toLowerCase().trim() || '';
     let count = 0;
     cards.forEach((card) => {
@@ -68,6 +124,13 @@ import Icon from './Icon.astro';
       ?.toggleAttribute('hidden', count > 0);
   }
   input?.addEventListener('input', filter);
+  document.getElementById('clear-search-btn')?.addEventListener('click', () => {
+    if (input) {
+      input.value = '';
+      filter();
+      input.focus();
+    }
+  });
   document
     .querySelectorAll<HTMLButtonElement>('[data-filter]')
     .forEach((button) =>

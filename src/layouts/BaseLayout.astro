@@ -16,6 +16,12 @@ interface Props {
   shell?: 'site' | 'app' | 'reading';
   /** Language of the main content (`<html lang>`); site chrome stays English. */
   lang?: string;
+  /** Social share preview image (path or full URL). */
+  image?: string;
+  /** Open Graph type: 'website' or 'article'. Defaults to 'website'. */
+  type?: 'website' | 'article';
+  /** Schema.org structured data (JSON-LD) object or array of objects. */
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 const {
   title,
@@ -24,16 +30,27 @@ const {
   alternates = [],
   shell = 'site',
   lang = 'en',
+  image,
+  type = 'website',
+  structuredData,
 } = Astro.props;
-const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true' && !noindex;
+const isIndexableEnv =
+  import.meta.env.PUBLIC_INDEXABLE === 'true' ||
+  process.env.PUBLIC_INDEXABLE === 'true';
+const indexable = isIndexableEnv && !noindex;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const path = Astro.url.pathname;
-const inGuides = path.startsWith('/blog') || path.startsWith('/vi/blog');
+const inBlog = path.startsWith('/blog') || path.startsWith('/vi/blog');
 // Preload the text font so the first paint does not swap fonts (layout shift).
 const fonts = path.startsWith('/vi/')
   ? [geistLatin, geistVietnamese]
   : [geistLatin];
 const footerTools = tools.slice(0, 5);
+const shareImage = image
+  ? image.startsWith('http')
+    ? image
+    : new URL(image, Astro.site).toString()
+  : undefined;
 ---
 
 <!doctype html>
@@ -59,9 +76,23 @@ const footerTools = tools.slice(0, 5);
       ))}
     <meta property="og:title" content={`${title} | InfraTrove`} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:site_name" content="InfraTrove" />
     {indexable && <meta property="og:url" content={canonical} />}
+    {shareImage && <meta property="og:image" content={shareImage} />}
+    <meta
+      name="twitter:card"
+      content={shareImage ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={`${title} | InfraTrove`} />
+    <meta name="twitter:description" content={description} />
+    {shareImage && <meta name="twitter:image" content={shareImage} />}
+    {structuredData && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData)}
+      />
+    )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {fonts.map((href) => (
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
@@ -110,8 +141,8 @@ const footerTools = tools.slice(0, 5);
           >
             Tools
           </a>
-          <a href="/blog/" aria-current={inGuides ? 'page' : undefined}>
-            Guides
+          <a href="/blog/" aria-current={inBlog ? 'page' : undefined}>
+            Blog
           </a>
           <a
             href="/about/"
@@ -164,8 +195,8 @@ const footerTools = tools.slice(0, 5);
         >
           Tools
         </a>
-        <a href="/blog/" aria-current={inGuides ? 'page' : undefined}>
-          Guides
+        <a href="/blog/" aria-current={inBlog ? 'page' : undefined}>
+          Blog
         </a>
         <a
           href="/about/"
@@ -206,16 +237,16 @@ const footerTools = tools.slice(0, 5);
           </ul>
         </div>
         <div class="footer-col">
-          <h2>Guides</h2>
+          <h2>Blog</h2>
           <ul>
             <li>
               <a href="/blog/" hreflang="en">
-                Guides in English
+                Blog in English
               </a>
             </li>
             <li>
               <a href="/vi/blog/" hreflang="vi" lang="vi">
-                Hướng dẫn tiếng Việt
+                Bài viết tiếng Việt
               </a>
             </li>
           </ul>

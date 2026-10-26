@@ -9,7 +9,9 @@ const blog = defineCollection({
     category: z.string(),
     readingTime: z.string(),
     updated: z.string(),
-    tool: z.string(),
+    tool: z.string().optional(),
+    author: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
 });
 export const collections = { blog };
