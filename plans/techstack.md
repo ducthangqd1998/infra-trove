@@ -4,7 +4,7 @@ version: "1.0"
 status: "Proposed technical baseline — ready for implementation planning"
 updated: "2026-10-26"
 project: "InfraTrove"
-language: "vi-VN"
+language: "en"
 website_language: "en"
 architecture: "Static-first website + client-side interactive utilities"
 business_model: "SEO + free online tools + evergreen content + display advertising"
@@ -13,86 +13,86 @@ related_document: "feature.md"
 
 # InfraTrove — Tech Stack & Architecture (v1.0)
 
-> **Mục đích:** Tài liệu kỹ thuật gốc để thiết kế, lập kế hoạch và triển khai InfraTrove. Tập trung vào một website **free online tools + blog**, kiếm traffic từ SEO và monetization chính bằng **display ads**; không thiết kế SaaS hay backend phức tạp.
+> **Purpose:** Foundational technical document to design, plan, and implement InfraTrove. Focuses on a **free online tools + blog** platform, acquiring traffic via SEO with primary monetization through **display ads**; intentionally avoids complex SaaS abstractions or heavy backends.
 >
-> **Trạng thái:** Bản kiến trúc đề xuất, chưa phải source code đã được triển khai hoặc benchmark hiệu năng. Những lệnh bên dưới là hướng dẫn bootstrap, cần kiểm tra lại tương thích package versions khi chạy.
+> **Status:** Proposed technical baseline; not a finalized production benchmark or complete source codebase. Commands listed below are bootstrap guides and require package version compatibility checks at execution time.
 >
-> **Tài liệu song hành:** [feature.md](feature.md) mô tả sản phẩm và UX. Nếu blueprint với tài liệu này khác nhau ở chi tiết implementation, **tài liệu này ưu tiên cho tech stack**, còn trạng thái và thứ tự ưu tiên tools theo §5 của blueprint.
+> **Companion Document:** [feature.md](feature.md) defines product and UX requirements. If this technical document differs from the product blueprint in implementation details, **this document takes precedence for tech stack specifications**, while catalog status and tool priorities follow §5 of the product blueprint.
 
 ## 1. Executive decision
 
-**Chọn một codebase Astro static-first, các tools tương tác bằng React + TypeScript, nội dung biên tập bằng Markdown/MDX, build tĩnh và phân phối qua Cloudflare Workers Static Assets.**
+**Select an Astro static-first codebase, interactive tools powered by React + TypeScript islands, editorial content authored in Markdown/MDX, built statically, and globally distributed via Cloudflare Workers Static Assets.**
 
-Các mục tiêu không thay đổi:
+Inflexible core objectives:
 
-- Website tiếng Anh, phục vụ thị trường quốc tế.
-- Người dùng mở tool và thao tác **không cần đăng ký**, không có paywall.
-- SEO-friendly HTML được tạo tại **build time**.
-- Phần lớn phép biến đổi dữ liệu chạy **trong browser**, không upload lên server.
-- Chi phí hạ tầng thấp, có thể thêm tool/blog page từng bước.
-- Ads chỉ triển khai khi phù hợp, không được làm suy giảm tính riêng tư hoặc tác vụ chính.
+- English website targeting international global search audiences.
+- Users open a tool and complete their task **without signing up**, free of paywalls.
+- SEO-friendly HTML generated at **build time**.
+- The vast majority of data transformations execute **inside the user's browser**, never transmitted to a server.
+- Low infrastructure overhead with gradual, incremental tool and blog additions.
+- Display advertising integrated only where appropriate, never compromising user privacy or the primary utility task.
 
 ### 1.1 Technology decision matrix
 
-| Layer | Lựa chọn | Mức độ | Lý do |
+| Layer | Selection | Status | Rationale |
 |---|---|---|---|
-| Web framework | **Astro**, stable release đã thử nghiệm | **Chọn** | SSG, HTML sẵn, Islands Architecture, content sites |
-| Framework version | **Astro 7.x** tại ngày 24/10/2026; pin lockfile | **Baseline cập nhật** | Astro 7 đã phát hành; trước đây thảo luận Astro 6 |
-| Runtime build | **Node.js 24 LTS**, phiên bản patch hiện hành | **Đề xuất** | Có thể dùng cùng local + CI; đối chiếu điều kiện của Astro |
-| Package manager | **pnpm** | **Chọn** | Lockfile, dependency management |
-| Interactive UI | **React + TypeScript** | **Chọn** | Component ecosystem, dễ test và viết riêng từng tool |
-| CSS | **Tailwind CSS 4 + CSS variables** | **Chọn** | Thiết kế nhất quán, utility styles, tokens tập trung |
-| Content | **Astro Content Collections + Markdown/MDX** | **Chọn** | Git-based, schema, build-time routes |
-| Icons | **Lucide** | **Đề xuất** | SVG tối giản, nhất quán |
-| Editor | Native textarea; **CodeMirror 6** khi cần | **Theo tool** | Tránh tải editor nặng ở mọi trang |
-| Hosting/CDN | **Cloudflare Workers Static Assets** | **Chọn** | Phân phối assets tĩnh toàn cầu, không cần application server |
-| CI | **GitHub Actions** | **Chọn** | Typecheck, tests, build, smoke checks |
-| Deployment | **Cloudflare Workers Builds** *hoặc* CI deploy qua Wrangler | **Chọn một** | Tránh hai workflow deploy cùng lúc |
-| Unit tests | **Vitest** | **Chọn** | Test parsing, generators, converters |
-| Browser/E2E | **Playwright** | **Chọn** | Verify interaction, responsive, key flows |
-| SEO measurement | **Google Search Console** | **Chọn** | Impressions/clicks/indexing theo URL |
-| Product analytics | **GA4** hoặc privacy-conscious analytics | **Chọn sau khi cân nhắc consent** | Không gửi nội dung người dùng nhập |
-| Ads | **Google AdSense** khi được duyệt | **Dự kiến** | Monetization, không phải dependency của MVP |
-| Database | **Không** | **Không cần** | Không có accounts hoặc server data |
-| Backend/API | **Không mặc định** | **Không cần** | Utilities ưu tiên local/client-side |
-| User auth | **Không** | **Không cần** | No-login product |
-| CMS | **Không** | **Không cần** | Markdown trong Git đủ cho solo founder |
+| Web framework | **Astro**, tested stable release | **Selected** | SSG, pre-rendered HTML, Islands Architecture, ideal for content sites |
+| Framework version | **Astro 7.x** as of October 24, 2026; pinned lockfile | **Updated baseline** | Astro 7 is the stable major release; supersedes initial Astro 6 exploratory discussions |
+| Build runtime | **Node.js 24 LTS**, current patch version | **Proposed** | Parity between local development and CI; conforms to Astro requirements |
+| Package manager | **pnpm** | **Selected** | Deterministic lockfile, efficient disk and dependency management |
+| Interactive UI | **React + TypeScript** | **Selected** | Rich component ecosystem, testable pure functions per tool |
+| CSS | **Tailwind CSS 4 + CSS custom properties** | **Selected** | Consistent design tokens, utility classes, centralized styling |
+| Content | **Astro Content Collections + Markdown/MDX** | **Selected** | Git-backed, strict schema validation, build-time routing |
+| Icons | **Lucide** | **Proposed** | Minimalist, consistent, lightweight SVG icons |
+| Editor | Native textarea; **CodeMirror 6** when essential | **Per-tool** | Prevents shipping heavy editor bundles to pages that do not need them |
+| Hosting/CDN | **Cloudflare Workers Static Assets** | **Selected** | Global static asset distribution without requiring application servers |
+| CI | **GitHub Actions** | **Selected** | Typecheck, test execution, production build, smoke tests |
+| Deployment | **Cloudflare Workers Builds** *or* CI deploy via Wrangler | **Select one** | Prevents race conditions from two simultaneous deploy pipelines |
+| Unit tests | **Vitest** | **Selected** | Fast in-memory testing for parsing, generators, and converters |
+| Browser/E2E | **Playwright** | **Selected** | Validates user interaction, responsiveness, and critical workflows |
+| SEO measurement | **Google Search Console** | **Selected** | URL-level impressions, clicks, ranking queries, and index coverage |
+| Product analytics | **GA4** or privacy-conscious analytics | **Subject to consent** | Strictly zero transmission of user-entered payload data |
+| Ads | **Google AdSense** upon approval | **Planned** | Monetization layer, not an architectural dependency of the MVP |
+| Database | **None** | **Not needed** | Zero user accounts, server-side persistence, or relational data |
+| Backend/API | **None by default** | **Not needed** | Utilities prioritize 100% local, client-side execution |
+| User auth | **None** | **Not needed** | Pure no-login utility model |
+| CMS | **None** | **Not needed** | Markdown managed in Git is sufficient and optimal for a solo founder |
 
-> **Lưu ý version:** Astro 7.0 phát hành ngày 22/06/2026 và có các phiên bản mới hơn trong tháng 10/2026. Để tránh mâu thuẫn giữa `@latest` và một major cũ, **bootstrap bằng bản stable hiện hành**, sau đó commit `pnpm-lock.yaml` và dùng cùng lockfile trên CI. Không nâng major tự động trên production. Node cần đáp ứng yêu cầu tối thiểu của release cụ thể.
+> **Version Note:** Astro 7.0 was released on June 22, 2026, with successive maintenance updates in October 2026. To avoid discrepancies between `@latest` and legacy majors, **bootstrap using the current verified stable release**, commit `pnpm-lock.yaml`, and enforce the exact lockfile on CI. Do not auto-bump major dependencies in production. Node runtime must satisfy the engine requirements of the specific release.
 
 ### 1.2 Architecture principles
 
-1. **Static first:** mọi landing page phải có HTML đầy đủ tại build time.
-2. **Islands only where necessary:** JS tương tác chỉ load trên vùng thực sự cần.
-3. **Correctness > feature count:** tool phải test được edge cases, báo lỗi rõ.
-4. **No secrets to backend:** không có endpoint nhận password/JWT/JSON/text người dùng nhập.
-5. **Privacy before Ads:** script quảng cáo và analytics không được đọc dữ liệu nhạy cảm của tool.
-6. **Consistent UX:** tool pages có layout và design tokens chung.
-7. **SEO follows usefulness:** không tạo trang rỗng hoặc near-duplicate để tăng URL count.
-8. **Simple deploy:** một repo, một static build, một CDN.
+1. **Static first:** Every landing page must deliver fully formed, semantic HTML at build time.
+2. **Islands only where necessary:** Interactive JavaScript loads strictly on regions requiring user interaction.
+3. **Correctness > feature count:** Every utility must be rigorously tested for edge cases and deliver unambiguous error messages.
+4. **No secrets to backend:** Zero server endpoints receive user-pasted passwords, JWTs, JSON, or text inputs.
+5. **Privacy before Ads:** Third-party ad scripts and analytics must never access or inspect sensitive tool inputs.
+6. **Consistent UX:** Tool pages share standardized layouts, keyboard ergonomics, and design tokens.
+7. **SEO follows usefulness:** Never generate empty or near-duplicate doorway pages solely to inflate URL counts.
+8. **Simple deploy:** Single repository, single static build artifact, distributed on edge CDN.
 
-## 2. Scope: có và không có
+## 2. Scope: In Scope vs. Explicit Non-Goals
 
 ### 2.1 In scope (v1)
 
-- Homepage, Tool Directory, categories, tool detail pages.
-- Blog listing + article pages, About/Contact/Privacy/Terms.
-- Search tool nhanh; Favorites lưu local (không chứa input).
-- Light/dark theme, responsive UI, keyboard usability.
-- SEO metadata, sitemap, canonical, robots.txt, Open Graph.
-- 8 tools core: Password Generator, Text Compare, Cron Generator, JSON Formatter, Unix Timestamp, Base64, URL Encoder/Decoder và UUID Generator.
-- Đợt mở rộng đã triển khai, tổng cộng 12 tools: YAML ↔ JSON, JWT Decoder, Storage Unit Converter và Hash & Checksum. Upload / Restore Time đứng đầu hàng đợi sau đó; phạm vi và thứ tự đầy đủ theo [feature.md](feature.md), cập nhật 2026-10-26. Đây là ưu tiên sản phẩm, chưa phải keyword/SEO validation.
-- Quality gates: lint/typecheck/tests/build/E2E smoke.
-- Search Console, analytics được cấu hình an toàn, Ads ở giai đoạn sau.
+- Homepage, Tool Directory, category browsing, individual tool detail pages.
+- Blog directory + article pages, About, Contact, Privacy, Terms.
+- Fast client-side tool search; locally persisted Favorites (slugs only, never user input).
+- Light/dark theme, responsive mobile-to-desktop UI, full keyboard accessibility.
+- SEO metadata, sitemap, canonical links, robots.txt, Open Graph images.
+- 8 core tools: Password Generator, Text Compare, Cron Generator, JSON Formatter, Unix Timestamp Converter, Base64 Encoder/Decoder, URL Encoder/Decoder, UUID Generator.
+- Completed expansion batch bringing catalog to 12 live tools: YAML ↔ JSON Converter, JWT Decoder, Storage Unit Converter, Hash & Checksum. The next queue begins with Upload / Restore Time Calculator; full scope and sequence detailed in [feature.md](feature.md), updated 2026-10-26. This reflects product prioritization, pending future keyword/SEO validation.
+- Automated quality gates: formatting, linting, typechecking, unit tests, static validation, Playwright E2E smoke suite.
+- Search Console and privacy-safe analytics setup; ad monetization introduced in subsequent phases.
 
 ### 2.2 Explicit non-goals
 
-- Cloud cost SaaS, monitoring, paid APIs, subscriptions, user account/team management.
-- Kubernetes cluster, microservices, Redis, PostgreSQL, server queues.
-- Tự động lưu nội dung được paste vào history, URL, cookies, analytics.
-- Server-side processing PDF/video/image dung lượng lớn ở giai đoạn đầu.
-- AI inference API trả tiền cho mỗi lần user dùng tool.
-- Mass-generated SEO pages không có giá trị riêng.
+- Cloud cost estimators, infrastructure monitoring, paid APIs, subscriptions, user accounts, or team management dashboards.
+- Kubernetes clusters, microservices architectures, Redis caches, PostgreSQL databases, or server queues.
+- Automatic persistence of user-pasted content to server logs, URLs, query parameters, cookies, or analytics events.
+- Server-side processing of large PDFs, videos, or raw binary assets in initial phases.
+- Paid per-invocation AI inference APIs for standard utility tasks.
+- Mass-generated, programmatic SEO pages lacking distinct user utility.
 
 ## 3. System architecture
 
@@ -112,26 +112,26 @@ flowchart TD
 
 ### 3.1 Request lifecycle
 
-1. Browser gọi `/tools/text-compare/`.
-2. Cloudflare trả về HTML đã prerender, CSS và assets liên quan.
-3. H1, metadata, công dụng, examples, FAQ/editorial text, related tools và breadcrumbs đã xuất hiện ở HTML build-time.
-4. React island của tool hydrate để chạy logic. Chỉ tool đang dùng mới cần JS tương ứng.
-5. Text diff tính trong tab của người dùng; **không có network request để xử lý input**.
-6. Analytics (nếu được bật và có consent phù hợp) chỉ ghi **event metadata**, không có raw input/output.
+1. Browser requests `/tools/text-compare/`.
+2. Cloudflare CDN immediately returns pre-rendered HTML, global CSS, and static assets.
+3. H1, metadata, instructions, examples, FAQ, related tools, and breadcrumbs are present in the build-time HTML.
+4. The React island for the specific tool hydrates in the background. Only the active tool's JavaScript is loaded.
+5. Text diffing computes directly inside the visitor's browser tab; **no network requests are dispatched to process inputs**.
+6. Analytics (if enabled and consent-approved) logs only **high-level event metadata**, never raw input/output.
 
-### 3.2 Vì sao không dùng Next.js làm mặc định?
+### 3.2 Why not Next.js by default?
 
-Next.js vẫn SEO tốt và có static export. Tuy nhiên InfraTrove thiên về **content + interactive widgets**, nên Astro ít cần tổ chức app-level hydration, backend conventions và runtime server. Đây là lựa chọn về độ phù hợp, không phải tuyên bố Next.js kém SEO.
+Next.js provides excellent SEO capabilities and static export functionality. However, InfraTrove is structurally centered on **content + self-contained interactive widgets**. Astro eliminates app-level runtime hydration overhead, complex backend conventions, and unnecessary server runtimes. This is an architectural fit decision, not a critique of Next.js SEO capabilities.
 
 ### 3.3 Static hosting economics
 
-Cloudflare Workers Static Assets công bố **static asset requests miễn phí và không giới hạn** theo chính sách tại thời điểm nghiên cứu; những request thực thi Worker scripts/SSR có chính sách billing riêng. Điều này không đồng nghĩa mọi chi phí của InfraTrove bằng $0: vẫn có domain, analytics/third-party services (nếu dùng), thời gian vận hành và thay đổi chính sách nhà cung cấp.
+Cloudflare Workers Static Assets provides **free and unmetered static asset requests** under its standard platform terms; requests that execute Worker scripts or dynamic SSR runtimes follow separate compute billing tiers. This does not imply zero operational cost for InfraTrove: custom domain renewal, analytics services, operator time, and upstream policy updates remain factors.
 
-**Quyết định:** Không cấu hình Worker `main` hoặc `run_worker_first` cho site tĩnh v1, trừ khi có lý do đã được xác minh. Tránh biến mọi page request thành billable Worker execution.
+**Architectural Decision:** Do not configure a Worker `main` entrypoint or `run_worker_first` for pure static v1 pages. Avoid converting ordinary static page requests into billable Worker compute invocations.
 
 ## 4. Information architecture & route strategy
 
-### 4.1 Định tuyến
+### 4.1 Routing structure
 
 ```text
 /
@@ -140,10 +140,14 @@ Cloudflare Workers Static Assets công bố **static asset requests miễn phí 
 /tools/text-compare/
 /tools/cron-generator/
 /tools/json-formatter/
-/tools/unix-timestamp/
-/tools/base64/
-/tools/jwt-decoder/
+/tools/unix-timestamp-converter/
+/tools/base64-encoder-decoder/
+/tools/url-encoder-decoder/
 /tools/uuid-generator/
+/tools/yaml-json-converter/
+/tools/jwt-decoder/
+/tools/storage-unit-converter/
+/tools/hash-checksum/
 /blog/
 /blog/<post-slug>/
 /about/
@@ -157,53 +161,53 @@ Cloudflare Workers Static Assets công bố **static asset requests miễn phí 
 /examples/
 ```
 
-**URL convention đề xuất:** lowercase kebab-case và **trailing slash nhất quán** cho HTML pages. Canonical, sitemap và nội bộ phải dùng cùng một URL chuẩn. Nếu chọn không có trailing slash thì thay đổi đồng bộ cấu hình Astro/Cloudflare trước launch; không để hai URL khác nhau index cùng nội dung.
+**URL Convention:** Strict lowercase kebab-case with **consistent trailing slashes** for all HTML pages. Canonical tags, sitemaps, and internal links must use the exact canonical path. Prevent dual-indexing of trailing-slash and non-trailing-slash variations.
 
 ### 4.2 Tool page anatomy
 
 ```text
-Header: Logo | Tools | Blog | Search / Command palette | Theme
+Header: Logo | Tools | Blog | Search / Command palette | Theme toggle
 Breadcrumbs: Home > Tools > JSON Formatter
 H1: JSON Formatter & Validator
-Short value proposition + note on privacy
+Short value proposition + note on client-side privacy
 
-[ Interactive tool (above the fold) ]
-[ Input / Output / Clear / Copy / Error states ]
+[ Interactive tool workspace (above the fold) ]
+[ Input / Output / Clear / Copy / Inline Error States ]
 
-How to use (concise steps)
-Examples / supported formats / limitations
-Common errors / troubleshooting
+How to use (concise step-by-step instructions)
+Examples / supported formats / technical limits
+Common errors / troubleshooting guide
 Related tools
 Related blog guides
 Footer: About, Contact, Privacy, Terms
 ```
 
-Không đặt quảng cáo hoặc hero block lớn giữa H1 và vùng tool input. Trên mobile, primary action phải dễ chạm và editor có kích thước hợp lý.
+Never insert banner ads or large visual hero elements between the H1 and the tool workspace. On mobile screens, primary action buttons must have at least 44px tap targets and editors must resize cleanly.
 
-### 4.3 Homepage
+### 4.3 Homepage layout
 
-- Headline rõ: **Free Online Tools for Everyday Work** (tagline có thể đổi sau).
-- Search tools nổi bật, có thể filter theo category.
-- Popular / recently added tool cards (không dùng fake usage counts).
-- Group by Text, Data, Generators, Time & Scheduling, Networking, Web.
-- Links tới một số evergreen articles/chủ đề có liên quan.
-- Footer trust/legal đầy đủ.
+- Direct headline: **Free Online Tools for Everyday Work** (subject to refinement).
+- Prominent search input with category filtering.
+- Popular / recently updated tool cards (no fabricated usage statistics).
+- Logical category groupings: Text, Data, Generators, Time & Scheduling, Networking, Web.
+- Curated links to evergreen guides and technical articles.
+- Comprehensive trust and legal footer.
 
 ### 4.4 Content organization
 
-| Loại nội dung | Source | Route | Rendering |
+| Content Type | Source | Route | Rendering |
 |---|---|---|---|
-| Homepage | `.astro` | `/` | Static |
-| Tool directory | registry + metadata | `/tools/` | Static + client search |
-| Tool detail | `.astro` page + React island | `/tools/<slug>/` | Static + island |
-| Blog listing | Content Collection | `/blog/` | Static |
-| Blog article | Markdown/MDX | `/blog/<slug>/` | Static |
-| Legal pages | `.astro` / Markdown | `/privacy/`, `/terms/` | Static |
-| Cheat sheets | Markdown + components | Khi được duyệt | Static |
+| Homepage | `.astro` | `/` | Static HTML |
+| Tool directory | Registry + metadata | `/tools/` | Static HTML + client-side search |
+| Tool detail | `.astro` page + React island | `/tools/<slug>/` | Static HTML + island hydration |
+| Blog listing | Content Collection | `/blog/` | Static HTML |
+| Blog article | Markdown/MDX | `/blog/<slug>/` | Static HTML |
+| Legal pages | `.astro` / Markdown | `/privacy/`, `/terms/` | Static HTML |
+| Cheat sheets | Markdown + components | When approved | Static HTML |
 
 ## 5. Repository structure
 
-**Một repo** là đủ. Không tách packages/monorepo khi mới có vài tools.
+A **single, unified repository** is optimal. Avoid monorepo tooling or package splitting during the early product lifecycle.
 
 ```text
 infratrove/
@@ -219,16 +223,16 @@ infratrove/
 │   │   ├── tools/              # ToolShell, Editor, CopyButton, InputRow
 │   │   └── ui/                 # Button, Card, Search, ThemeToggle
 │   ├── content/
-│   │   ├── blog/               # Markdown/MDX articles
+│   │   ├── blog/               # Markdown/MDX articles (en + vi)
 │   │   └── tools/              # Per-tool descriptions + SEO content (optional)
 │   ├── content.config.ts
 │   ├── data/
-│   │   ├── tool-registry.ts    # Navigation + relation metadata
+│   │   ├── tools.ts            # Typed tool registry & relation metadata
 │   │   └── categories.ts
 │   ├── layouts/
 │   │   ├── BaseLayout.astro
 │   │   ├── ToolLayout.astro
-│   │   └── BlogLayout.astro
+│   │   └── BlogPostLayout.astro
 │   ├── lib/
 │   │   ├── seo/
 │   │   ├── analytics/
@@ -244,7 +248,7 @@ infratrove/
 │   │   │   └── ...
 │   │   ├── blog/
 │   │   │   ├── index.astro
-│   │   │   └── [...id].astro
+│   │   │   └── [slug].astro
 │   │   ├── about.astro
 │   │   ├── contact.astro
 │   │   ├── privacy.astro
@@ -274,18 +278,18 @@ infratrove/
 └── README.md
 ```
 
-**Quan trọng về Astro hydration:** `client:*` directive chỉ hỗ trợ UI framework components được import trực tiếp vào `.astro` file; **không dùng một dynamic React component map tại runtime** rồi mong `client:load` hoạt động. Ở v1 mỗi tool có một `.astro` route mỏng import trực tiếp component của nó, dùng chung `ToolLayout`. Registry dùng cho navigation/search/metadata, không cố render dynamic islands bằng string key. Nếu hàng trăm tools mới nghiên cứu build-time code generation.
+**Critical Astro Hydration Rule:** Astro's `client:*` directives strictly require UI framework components to be imported statically into `.astro` templates; **do not use dynamic runtime component maps** expecting `client:load` to resolve properly. Each tool maintains a thin `.astro` route that directly imports its React component, wrapped in `ToolLayout`. The registry handles navigation, metadata, and search indexing, without attempting runtime dynamic island instantiation.
 
 ## 6. Bootstrapping & commands
 
 ### 6.1 Prerequisites
 
-- Node.js 24 LTS (patch mới), pnpm hiện hành.
-- Cloudflare account + domain đã cấu hình khi deploy production.
-- GitHub repo.
-- Chạy cùng Node major/version trên local và CI; commit lockfile.
+- Node.js 24 LTS (latest patch version), active pnpm installation.
+- Configured Cloudflare account and verified domain for production deployment.
+- GitHub repository.
+- Identical Node versions across local and CI environments; pinned lockfile.
 
-### 6.2 Create project
+### 6.2 Project initialization
 
 ```bash
 pnpm create astro@latest infratrove
@@ -300,13 +304,13 @@ pnpm add -D @astrojs/check typescript wrangler vitest @playwright/test
 pnpm add lucide-react
 ```
 
-- Chọn starter tối giản và output static.
-- `astro add tailwind` cho Astro hiện đại dùng **Tailwind 4 Vite plugin**, không cần `@astrojs/tailwind` (legacy integration).
-- Cài tool-specific packages **khi build tool tương ứng** (ví dụ `diff`, `yaml`, `cron-parser`) thay vì thêm tất cả ngay từ đầu.
-- Chạy `pnpm exec playwright install chromium` trước khi chạy E2E ở môi trường mới.
-- Sau khi bootstrap, kiểm tra lại dependencies/version compatibility, lint config và CSS import do generator tạo.
+- Initialize with a minimal starter and static output configuration.
+- Tailwind 4 uses the official `@tailwindcss/vite` plugin directly within Vite config.
+- Install tool-specific packages only when developing the respective tool (e.g., `js-yaml`, `cron-parser`).
+- Run `pnpm exec playwright install chromium` before running E2E suites in a new environment.
+- Validate dependencies, linting configurations, and CSS imports post-initialization.
 
-### 6.3 Suggested `package.json` scripts
+### 6.3 Baseline `package.json` scripts
 
 ```json
 {
@@ -323,9 +327,7 @@ pnpm add lucide-react
 }
 ```
 
-> `astro check`/Vitest/Playwright cần có config phù hợp project thực tế; script ở trên là baseline chứ không phải chứng nhận một repo hiện có đã chạy pass.
-
-### 6.4 Astro config
+### 6.4 Astro configuration
 
 ```js
 // astro.config.mjs
@@ -336,7 +338,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://infratrove.com', // Chỉ dùng sau khi sở hữu domain
+  site: 'https://infratrove.com', // Configure once domain ownership is verified
   output: 'static',
   trailingSlash: 'always',
   integrations: [react(), mdx(), sitemap()],
@@ -356,7 +358,7 @@ export default defineConfig({
 }
 ```
 
-Import global stylesheet một lần tại `BaseLayout.astro`. Tách light/dark tokens sau khi chốt design; không dùng `color-scheme` thay cho implementation theme thực tế.
+Global styles are imported once in `BaseLayout.astro`. Light and dark theme tokens are mirrored in `DESIGN.md`.
 
 ### 6.5 Example Astro tool route
 
@@ -369,18 +371,18 @@ import JsonFormatter from '../../tools/json-formatter/JsonFormatter';
 
 <ToolLayout
   title="JSON Formatter & Validator"
-  description="Format, validate, and beautify JSON online."
+  description="Format, validate, and beautify JSON online directly in your browser."
   slug="json-formatter"
 >
   <JsonFormatter client:load />
 </ToolLayout>
 ```
 
-- Route tạo sẵn HTML + tool shell có thể render ban đầu.
-- `client:load` cho widget cần thao tác ngay. Tool phụ ở dưới trang có thể dùng `client:idle` hoặc `client:visible` nếu hợp lý.
-- Nếu SEO content nằm trong Markdown collection, ToolLayout lấy content theo slug build-time; tránh double-maintenance tiêu đề và description.
+- Pre-renders static shell and SEO markup.
+- `client:load` hydrates interactive widgets immediately.
+- Explanatory content pulled from Markdown collections avoids duplicated copy maintenance.
 
-### 6.6 Cloudflare config
+### 6.6 Cloudflare Workers configuration
 
 ```jsonc
 // wrangler.jsonc
@@ -396,7 +398,7 @@ import JsonFormatter from '../../tools/json-formatter/JsonFormatter';
 }
 ```
 
-Không thêm `main`, `binding: ASSETS` hoặc Cloudflare SSR adapter cho **pure-static site**. Chỉ thêm adapter nếu một quyết định mới yêu cầu SSR/on-demand rendering.
+No `main` Worker entrypoint or SSR adapter is attached to **purely static sites**. An SSR Worker is reserved exclusively for specific, isolated backend endpoints (e.g., guide comments API).
 
 ```bash
 pnpm run build
@@ -404,291 +406,267 @@ pnpm exec wrangler dev
 pnpm exec wrangler deploy
 ```
 
-Trước production: kiểm tra canonical, trailing slash redirect, `/404`, sitemap và domain chính. Nếu custom domain chưa mua thì **chưa trỏ production canonical** sang domain không sở hữu; dùng môi trường kiểm tra phù hợp và chặn index preview.
-
 ## 7. Component architecture & Tool Registry
 
 ### 7.1 Separation of concerns
 
-- **Logic:** pure functions và standard browser APIs, tối đa không phụ thuộc React.
-- **UI:** React component cho input, output, reset/copy, trạng thái loading/error.
-- **SEO/editorial:** Astro/Markdown, có ví dụ và giải thích do người biên tập kiểm tra.
-- **Shared UI:** ToolShell, CopyButton, Field, Banner, Tabs.
-- **Registry:** chứa slug, category, tags, related tools, privacy classification, state published.
+- **Logic:** Pure TypeScript functions leveraging standard browser APIs, decoupled from React.
+- **UI:** React islands handling input, state transitions, reset/copy actions, and accessible error messages.
+- **SEO/Editorial:** Astro templates and Markdown collections containing verified technical guides.
+- **Shared Primitives:** ToolShell, CopyButton, Select, Textarea, Alert badges.
+- **Registry:** Typed definition of slugs, categories, tags, related tools, and privacy classifications.
 
-Ví dụ (định nghĩa đơn giản để minh họa contract):
+Example interface contract:
 
 ```ts
 export type ToolRegistryItem = {
   slug: string;
   title: string;
+  shortTitle: string;
   summary: string;
-  category: 'text' | 'data' | 'generators' | 'time' | 'networking' | 'web';
+  category: 'Text & data' | 'Encode & decode' | 'Generators' | 'Time & scheduling';
   tags: string[];
-  relatedTools: string[];
-  published: boolean;
-  sensitivity: 'ordinary' | 'potentially-sensitive' | 'secret';
+  related: string[];
+  steps: string[];
+  example: string;
+  note: string;
 };
-
-export const tools: ToolRegistryItem[] = [
-  {
-    slug: 'password-generator',
-    title: 'Password Generator',
-    summary: 'Generate cryptographically secure passwords in your browser.',
-    category: 'generators',
-    tags: ['password', 'security', 'random'],
-    relatedTools: ['uuid-generator'],
-    published: true,
-    sensitivity: 'secret',
-  },
-];
 ```
 
-Giữ **single source of truth** cho metadata: hoặc registry chứa bản ngắn và Content Collection chứa long-form content, hoặc dùng một typed source rồi derive registry. Không copy title/description ở năm nơi khác nhau.
+Maintain a **single source of truth** for metadata to prevent desynchronized descriptions across navigation, sitemaps, and landing pages.
 
-### 7.2 Checklist khi thêm một tool
+### 7.2 Checklist for adding a new tool
 
-1. Có mục đích và search intent riêng, không trùng hoàn toàn tool khác.
-2. Viết `logic.ts` với test cases: normal, empty, malformed, boundary, Unicode/large input nếu có.
-3. Viết UI: input/output, example, errors, reset, copy, keyboard.
-4. Tạo tool route `.astro` và nội dung giải thích hữu ích.
-5. Bổ sung registry/categories/related tools.
-6. QA responsive, accessibility, Lighthouse.
-7. Kiểm tra analytics/ads/privacy classification.
-8. Test build, crawlable HTML, metadata, canonical và sitemap.
+1. Confirm a distinct search intent and discrete user task.
+2. Implement isolated pure logic in `logic.ts` with comprehensive unit tests for typical inputs, edge cases, boundaries, and malformed strings.
+3. Build the React island: accessible inputs/outputs, sample data loader, error state, reset, copy, and keyboard shortcuts.
+4. Create the dedicated `.astro` route in `src/pages/tools/`.
+5. Author bilingual companion guides (`en/` and `vi/`).
+6. Register the tool in `src/data/tools.ts`.
+7. Verify responsive layouts (375px mobile, 1280px desktop) and WCAG contrast in both light and dark themes.
+8. Validate build artifacts, static link checker, and Playwright E2E coverage.
 
-## 8. Proposed tool implementations
+## 8. Tool implementation specifications
 
-Đây là **technical requirements**, không phải checklist chứng minh mọi tool đã triển khai. Trạng thái catalog và thứ tự xây mới theo §5 của [feature.md](feature.md); đợt mở rộng 4 tools đã có implementation, còn keyword/SEO validation vẫn chưa hoàn tất.
+The table below outlines technical requirements and guardrails. Catalog status and sequencing are governed by §5 of [feature.md](feature.md).
 
-| Tool | Core engine | Bắt buộc kiểm tra | Privacy |
+| Tool | Core Engine | Mandatory Checks | Privacy Tier |
 |---|---|---|---|
-| Password Generator | `crypto.getRandomValues()` | uniform sampling, length, charset, exclusions | Secret |
-| Text Compare | `diff`/jsdiff | Unicode, newlines, whitespace, large input | Potentially-sensitive |
-| JSON Formatter | `JSON.parse`/`JSON.stringify` | syntax errors, size, deep nesting | Potentially-sensitive |
-| Cron Generator | cron parser + humanization | dialect, timezone, DST, next runs | Ordinary |
-| Unix Timestamp | JS Date / timezone utilities | seconds vs ms, negative/overflow, zone | Ordinary |
-| Base64 | Web APIs + TextEncoder/Decoder | Unicode, URL-safe, invalid strings | Potentially-sensitive |
-| URL Encoder / Decoder | `encodeURIComponent` / `decodeURIComponent` | Unicode, malformed percent escapes, component vs full URL | Potentially-sensitive |
-| UUID Generator | `crypto.randomUUID()` | valid UUID v4, bulk limit | Ordinary |
+| Password Generator | `crypto.getRandomValues()` | Uniform distribution, charset toggles, character exclusions | Secret |
+| Text Compare | In-memory line/word diff | Unicode, line endings, whitespace toggles, large inputs | Potentially sensitive |
+| JSON Formatter | Standard JSON parser | Syntax errors, size caps, nested structures, last-key precedence | Potentially sensitive |
+| Cron Generator | Standard cron parser | 5-field syntax, timezone conversions, DST shifts, next runs | Ordinary |
+| Unix Timestamp | Native Date / temporal math | Seconds vs. milliseconds, negative epochs, UTC/local/ISO | Ordinary |
+| Base64 | Web APIs + TextEncoder/Decoder | UTF-8 Unicode, standard vs. URL-safe, malformed padding | Potentially sensitive |
+| URL Encoder / Decoder | `encodeURIComponent` / `decodeURIComponent` | Percent-encoding, reserved characters, component vs. full URL | Potentially sensitive |
+| UUID Generator | `crypto.randomUUID()` | Valid RFC UUID v4 format, bulk limits | Ordinary |
 
-**Đợt mở rộng đã triển khai ngày 2026-10-26:**
+**Batch 1 Expansion Completed (2026-10-26):**
 
-| Tool | Core engine / constraints | Bắt buộc kiểm tra |
+| Tool | Core Engine / Constraints | Mandatory Checks |
 |---|---|---|
-| YAML ↔ JSON | Parser safe, local; không execute tags | Aliases/nesting/input limits, parse errors, type/comment round-trip limits |
-| JWT Decoder | Base64URL + JSON, không fetch JWKS | Malformed token; `exp`/`iat`/`nbf`; decode không verify signature |
-| Storage Unit Converter | Phép đổi SI/IEC thuần; cùng logic dùng lại cho Transfer Time | 1000 vs 1024, bits vs bytes, precision, giá trị invalid |
-| Hash & Checksum | Web Crypto SHA-256/SHA-512; text/file local | Reference vectors, size/memory limit, expected checksum, không lưu input/file |
+| YAML ↔ JSON | Safe parsing, 100k char cap | Reject tags/aliases, parse errors with line numbers, copy/download |
+| JWT Decoder | Base64URL + JSON, local only | Malformed token handling, UTC timestamps, prominent unverified disclaimer |
+| Storage Unit Converter | Exact rational arithmetic | SI (1000) vs. IEC (1024), 9-decimal precision, invalid character rejection |
+| Hash & Checksum | Web Crypto SHA-256 / SHA-512 | Reference vectors, 32 MiB file limit, case-insensitive expected hash compare |
 
-Hàng đợi tiếp theo: Upload / Restore Time, SQL Formatter, JSON ↔ CSV, Regex Tester, IPv4 / CIDR và chmod. Không thêm backend để triển khai các tool này; quy tắc correctness và bản đầu theo §6.1 của product spec. Chỉ chọn thư viện và giới hạn cụ thể khi triển khai từng tool.
+Next implementation queue: Upload / Restore Time Calculator, SQL Formatter, JSON ↔ CSV Converter, Regex Tester, IPv4 / CIDR Calculator, and chmod Calculator. All tools remain client-side without backend compute.
 
 ### 8.1 Password Generator
 
-- Dùng CSPRNG (`crypto.getRandomValues`), **không dùng `Math.random()`**.
-- Tránh modulo bias bằng rejection sampling nếu ánh xạ byte sang alphabet.
-- Chọn length, upper/lower/digits/symbols, ambiguous characters.
-- Không lưu password trong localStorage, logs, query string, error reporting hoặc analytics.
-- Copy button và màn hình cảm ứng dễ thao tác; không tự động đưa secret lên clipboard nếu user chưa chọn.
+- Uses CSPRNG (`crypto.getRandomValues()`), strictly prohibiting `Math.random()`.
+- Avoids modulo bias via rejection sampling when mapping entropy bytes to character sets.
+- Configurable length, uppercase, lowercase, numbers, symbols, and exclusion of ambiguous characters (`l`, `1`, `I`, `0`, `O`).
+- Never writes passwords to localStorage, browser history, URLs, logs, or analytics.
 
 ### 8.2 Text Compare
 
-- Side-by-side/unified diff tùy effort.
-- Ignore whitespace/line endings có giải thích rõ ảnh hưởng.
-- Giới hạn kích thước input để tránh treo tab, có thể dùng Web Worker khi dữ liệu lớn.
-- Raw text không được gửi ra third-party scripts hoặc telemetry.
+- Side-by-side and unified diff rendering modes.
+- Clear explanatory labels for whitespace and case-insensitivity toggles.
+- Input size caps prevent browser tab freezing.
+- Raw text is strictly processed in memory and never transmitted externally.
 
 ### 8.3 Cron Generator
 
-- Hỗ trợ một cron dialect rõ ràng từ đầu (ví dụ 5-field POSIX-like), không âm thầm trộn Unix, Quartz, Kubernetes, EventBridge.
-- Next execution preview cần sử dụng timezone rõ ràng, xử lý DST/ambiguous times đúng.
-- Với dialect không hỗ trợ, báo lỗi rõ thay vì cho kết quả có vẻ chính xác.
+- Standard Unix 5-field dialect supported cleanly from launch.
+- Next execution preview calculates timestamps against an explicit timezone (UTC vs. local).
+- Unsupported dialects fail with clear diagnostic messages rather than returning misleading schedules.
 
-### 8.4 JWT Decoder — đã triển khai, chỉ decode
+### 8.4 JWT Decoder
 
-- Decode **không đồng nghĩa verify signature**, UI phải nói rõ.
-- Không tự động gọi JWKS endpoint/third-party service bằng token đã paste.
-- Không gửi token vào URL, storage, analytics, session replay hoặc crash reporting.
-- Không khẳng định token hợp lệ chỉ dựa trên payload parse được.
+- Inspects compact three-part JWTs without verifying digital signatures; UI explicitly highlights this disclaimer.
+- Does not contact remote JWKS servers or external identity endpoints.
+- Tokens are never written to URLs, storage, session replays, or error telemetry.
 
 ### 8.5 JSON / Base64
 
-- Xử lý lỗi với vị trí/chi tiết hữu ích khi có thể.
-- Giới hạn input memory/size; cân nhắc Web Worker với transformations nặng.
-- Xử lý Unicode đúng và phân biệt Base64 binary vs UTF-8.
-- Không dùng `innerHTML` để render arbitrary user input.
+- Detailed line and column indicators for syntax errors where feasible.
+- Strict size boundaries with Web Worker offloading for heavier workloads.
+- Flawless Unicode UTF-8 handling; Base64 distinguished from URL-safe variants.
+- Never injects untrusted user inputs via `innerHTML`.
 
 ## 9. Design system
 
 ### 9.1 Visual direction
 
-- **Modern, minimal, developer-friendly**, ưu tiên utility chứ không phải landing page marketing.
-- Light/dark themes; code/technical output dễ đọc.
-- Typography: system UI hoặc Inter; monospace cho input/output/code.
-- Icons: Lucide nhỏ, thống nhất.
-- Có đủ whitespace, contrast, focus states; không dựa chỉ vào màu để báo lỗi.
-- Tool được trình bày ngay đầu trang; supporting SEO content ở phía dưới.
+- **Warm paper canvas, hairline borders, ink-black primary buttons, and amber/orange accents.**
+- Clean, utilitarian, high-contrast developer aesthetic; avoids generic neon cyberpunk tropes.
+- Dual light and dark themes with WCAG 2.2 AA contrast compliance.
+- Typography: System UI sans-serif; monospace for code, timestamps, and structured outputs.
+- Tool workspaces positioned immediately above the fold; supporting documentation positioned below.
 
-### 9.2 Components cần chuẩn hóa sớm
+### 9.2 Core components
 
-| Component | Hành vi |
+| Component | Responsibility |
 |---|---|
-| SiteHeader | Logo, Tools, Blog, search, theme |
-| ToolSearch | Filter theo title/tags, keyboard-friendly |
-| ToolCard | Name, short description, category |
-| ToolLayout | H1, description, widget, how-to, related tools |
-| ToolShell | Action area, errors, copy, clear, privacy note |
-| TextEditor | Accessible textarea mặc định, CodeMirror khi cần |
-| CodeOutput | Monospace, wrap toggle, copy |
-| Breadcrumbs | Navigation + structured data nếu phù hợp |
-| AdSlot | Chỉ render trên page types đã xét privacy/consent |
-| BlogLayout | Readable column, TOC khi dài, references |
+| SiteHeader | Branding, navigation links, global search trigger, theme toggle |
+| ToolSearch | Client-side filter across tool titles and tags, keyboard-accessible |
+| ToolCard | Card showing tool symbol, title, summary, tags, and favorite toggle |
+| ToolLayout | Standardized shell rendering breadcrumbs, H1, island workspace, and guides |
+| ToolShell | Universal workspace wrapper with action bars, error banners, and copy buttons |
+| Select | Custom accessible combobox replacing unstyled OS native dropdowns |
+| CopyButton | Accessible clipboard action with instant visual confirmation feedback |
+| Breadcrumbs | Semantic hierarchical navigation links |
 
-### 9.3 Interaction/performance principles
+### 9.3 Interaction and performance principles
 
-- Primary action dễ tìm, không bị quảng cáo che khuất.
-- Copy button có trạng thái success/error (không cần toast quá nhiều).
-- Không xóa user input do điều hướng nhầm nếu có thể tránh, nhưng **không tự lưu secrets**.
-- Favorites và theme preference có thể lưu localStorage (không chứa payload).
-- Search index nhỏ, tải theo nhu cầu; không cần Algolia/Elastic cho v1.
-- Mobile first, visible focus, screen reader labels, keyboard support.
+- Primary action buttons remain clearly visible and never displaced by dynamic elements.
+- Copy actions provide immediate visual confirmation without intrusive toast spam.
+- Pasted user input is preserved across syntax validation failures.
+- Slugs for locally favorited tools are stored in localStorage; user payloads are never stored.
+- Fully accessible keyboard navigation, visible focus indicators, and screen reader announcements.
 
 ## 10. SEO architecture
 
 ### 10.1 Per-page metadata
 
-- Một H1, descriptive title/description, canonical absolute URL.
-- Unique editorial content cho mỗi tool, không tạo hàng loạt trang na ná nhau.
-- Semantic HTML: headings, lists, labels, links, tables.
-- Open Graph and social preview images nếu hữu ích.
-- Breadcrumb links và related tools/contextual blog links.
-- Sitemap chỉ gồm indexable, canonical production URLs.
-- Có trang 404 trả mã HTTP 404 thật, không soft-404.
+- Single `<h1>`, descriptive title tag, meta description, and self-referential canonical URL.
+- Unique, high-signal editorial content per tool to prevent doorway page penalties.
+- Semantic HTML5 structure (headings, lists, labels, landmarks).
+- Open Graph and Twitter Card tags with preview artwork.
+- Breadcrumb navigation and contextual internal links between tools and guides.
+- XML sitemaps strictly contain indexable, canonical production URLs.
+- Custom 404 page returning genuine HTTP 404 status codes.
 
 ### 10.2 Static-first SEO
 
-- Google và các crawler phải đọc được main explanatory text **không cần chạy React**.
-- Không lazy-load H1, description hoặc links nội bộ chính bằng JS.
-- Tool results theo input người dùng **không index** và không tạo infinite URL combinations.
-- Staging/preview phải `noindex` và không đưa vào sitemap production.
-- `robots.txt` không thay thế `noindex` khi cần kiểm soát indexation.
-- `lastmod` chỉ cập nhật khi nội dung thay đổi thực sự.
+- Search crawlers receive full explanatory copy and documentation **without executing client JavaScript**.
+- Core editorial content is never hidden behind client-side fetch calls.
+- User input states are not indexed and cannot generate infinite URL permutations.
+- Staging and preview environments default to `noindex` headers and are excluded from production sitemaps.
 
 ### 10.3 Structured data
 
-Chỉ dùng schema type đúng với nội dung hiển thị, có kiểm chứng theo tài liệu Google: `WebSite`, `BreadcrumbList`, `Article`/`BlogPosting` khi phù hợp. Không thêm FAQ schema giả định sẽ có rich results. Không nhồi `SoftwareApplication`/ratings/reviews không có bằng chứng.
+Deploy validated schema types matching visible page content: `WebSite`, `BreadcrumbList`, and `BlogPosting`. Avoid invalid or speculative schemas.
 
 ### 10.4 SEO measurement
 
-- GSC: impressions, clicks, queries, indexed pages, CTR.
-- Analytics: pageviews, tool interaction rate, copy/export actions, returning visits (nếu đo hợp lệ).
-- Ads: Page RPM, viewability, revenue by page category sau khi monetized.
-- Không coi GSC clicks bằng GA4 pageviews.
-- Kết luận ranking/cơ hội SEO cần keyword/SERP research, không chỉ dựa vào việc tool dễ code.
+- Google Search Console: Query impressions, clicks, ranking positions, index status, and CTR.
+- Analytics: Pageviews, engaged sessions, copy interactions, and return visits.
+- Ad reporting: Page RPM, viewability metrics, and category revenue once monetized.
+- Never conflate Search Console click counts with web analytics pageviews.
 
 ## 11. Privacy, security & third-party scripts
 
-### 11.1 Threat model tối thiểu
+### 11.1 Threat model
 
-**Sensitive inputs:** passwords, access tokens, JWTs, pasted JSON, text diffs, API responses, source code và file contents. Người dùng có thể vô tình paste secrets vào tool bình thường.
+**Sensitive Inputs:** Passwords, private keys, API secrets, tokens, internal configs, database dumps, and source code. Users routinely paste sensitive credentials into online utilities.
 
-**Rủi ro:** Ads scripts, analytics/session replay, CSP yếu, XSS, browser extensions, remote error logging, URL query params, accidental persistence, dependency compromise.
+**Primary Vectors:** Unaudited ad scripts, analytics session replay tools, loose CSP headers, XSS vulnerabilities, browser extensions, remote error logging, URL leakage, and dependency supply-chain attacks.
 
-### 11.2 Non-negotiable rules
+### 11.2 Inviolable privacy rules
 
-1. Không gửi raw input/output đến analytics, logs, error-reporting hoặc Ads.
-2. Không lưu password, JWT, private keys, pasted text vào localStorage/IndexedDB mặc định.
-3. Không đặt secret vào URL/query/fragment khi không có một thiết kế explicit được kiểm tra security.
-4. Không có server endpoints xử lý dữ liệu users cho core tools v1.
-5. Với trang xử lý sensitive data, **không nhúng third-party scripts** trong cùng execution context; kiểm soát nghiêm ngặt các exceptions.
-6. Escape text output; không render arbitrary HTML từ input chưa sanitize.
-7. Dependency scanning/update và CSP theo từng môi trường; không copy CSP mẫu thiếu kiểm thử Ads/analytics.
-8. Nói chính xác về privacy: client-side **không tự động đồng nghĩa** an toàn nếu trang có script bên thứ ba.
+1. Never dispatch raw input/output payloads to analytics, logs, error reporting, or ad networks.
+2. Never store passwords, private keys, JWTs, or pasted content in localStorage or IndexedDB.
+3. Never append sensitive payloads to URL query parameters or hash fragments.
+4. Core utilities operate with zero server-side data processing endpoints.
+5. Tool execution contexts remain free of third-party advertising scripts.
+6. Escape all rendered outputs; never parse arbitrary user text as HTML markup.
+7. Enforce strict Content Security Policies (CSP) and automated dependency audits.
+8. Maintain transparent privacy notices: client-side processing is only secure when third-party scripts are completely isolated.
 
-### 11.3 Ads policy by page type
+### 11.3 Ad placement policy by page type
 
-| Page type | Ad placement v1 | Lý do |
+| Page Type | Ad Placement | Rationale |
 |---|---|---|
-| Password/JWT/secret tools | **Không** | Data sensitivity |
-| Text/JSON/other potentially-sensitive editors | **Mặc định không** | Input có thể chứa bí mật |
-| Non-sensitive calculators | Cân nhắc sau approval | Không chắn input hoặc results |
-| Blog/cheat sheets | Có thể triển khai sau approval | Dễ bố trí ads ít can thiệp tác vụ |
-| Home/tool directory | Cân nhắc rất hạn chế | Duy trì discovery UX |
+| Password, JWT, and secret tools | **None** | High data sensitivity |
+| Text, JSON, and code diff editors | **None by default** | Inputs frequently contain confidential data |
+| Non-sensitive calculators | Conditional after approval | Positioned cleanly outside task workspace |
+| Blog guides and reference articles | Permitted after approval | Easily separated from editorial content |
+| Directory and homepage | Very limited | Preserves navigation clarity and discovery |
 
-Sau này có thể nghiên cứu **cross-origin sandbox** cho tool frame để cô lập third-party scripts, nhưng không cần triển khai khi v1 chưa có Ads.
+Future iterations may evaluate cross-origin sandboxed iframes to isolate tool workspaces, but initial releases remain ad-free on tool pages.
 
-### 11.4 Consent/legal
+### 11.4 Legal and compliance
 
-- Privacy Policy, About/Contact và Terms khi phù hợp.
-- Khi dùng Ads/analytics cần đánh giá consent theo khu vực (EEA/UK/Switzerland, v.v.) và chính sách của vendor; không mặc định một cookie banner là đủ.
-- Không giả định AdSense approved khi chưa submit/được chấp thuận.
-- Đặt `ads.txt` đúng theo network requirements khi đã ký kết.
+- Privacy Policy, About, Contact, and Terms pages accurately reflect production architecture.
+- Geographically compliant consent management (EEA/UK/GDPR) enforced prior to activating advertising scripts.
+- Verified `ads.txt` deployed upon joining official ad exchange networks.
 
 ## 12. Performance & accessibility budgets
 
-### 12.1 Targets (engineering goals, not guaranteed results)
+### 12.1 Engineering targets
 
-- LCP <= 2.5 s (75th percentile, real-user data).
-- INP <= 200 ms (75th percentile).
-- CLS <= 0.1 (75th percentile).
-- Homepage/blog không hydrate React nếu không cần.
-- Tool-specific JS phải code-split; không ship mọi dependencies trên homepage.
-- Tối ưu font và images; tránh layout shifts khi load Ads.
-- Có graceful fallbacks khi JS bị tắt: tool không chạy được thì vẫn có explanation rõ.
+- Largest Contentful Paint (LCP) <= 2.5s (75th percentile).
+- Interaction to Next Paint (INP) <= 200ms (75th percentile).
+- Cumulative Layout Shift (CLS) <= 0.1 (75th percentile).
+- Tool-specific JavaScript split by route; homepage loads zero utility engine bundles.
+- Fonts and static assets optimized to prevent FOIT/FOUT and layout shifts.
+- Graceful degradation: If JavaScript is disabled, the page provides clear static documentation.
 
-### 12.2 Accessibility
+### 12.2 Accessibility baseline
 
-- Semantic labels, contrast, tab order, visible focus.
-- Shortcut không chiếm các phím phổ biến của editor/browser.
-- Công cụ có thể dùng được với keyboard; thông báo kết quả bằng `aria-live` phù hợp.
-- Không chỉ dùng màu xanh/đỏ cho diff/error; có text hoặc symbols bổ sung.
+- Semantic labels, high-contrast colors, logical tab sequences, and visible focus rings.
+- Keyboard shortcuts never intercept standard browser or editor editing shortcuts.
+- Dynamic calculation updates announced through accessible `aria-live` containers.
+- Color alone is never used to convey errors or diff modifications; accompanying text and icons are mandatory.
 
 ## 13. Testing strategy
 
 ### 13.1 Unit tests: logic first
 
-- Password: lengths, alphabets, exclusion sets, CSPRNG usage và non-biased selection.
-- Text diff: empty, whitespace/newline, Unicode, long texts.
-- JSON: valid/malformed, duplicate keys caveat, deeply nested/larger inputs.
-- Cron: next runs, timezone, DST boundaries, unsupported syntax.
-- Timestamp: seconds/milliseconds, negative epochs, invalid ranges.
-- Base64: invalid padding, Unicode, binary data, Base64URL.
-- JWT: invalid JWT, missing claims, unsigned/mismatched content and clear non-verification warnings.
+- **Password:** Length constraints, character set distribution, exclusion filters, CSPRNG enforcement.
+- **Text Diff:** Empty inputs, whitespace normalization, Unicode support, multiline structures.
+- **JSON:** Formatting indentation, minify behavior, syntax error diagnostics, duplicate key handling.
+- **Cron:** Schedule calculation, timezone shifts, DST boundaries, invalid expression rejection.
+- **Timestamp:** Second and millisecond inputs, negative epochs, invalid date boundaries.
+- **Base64:** URL-safe variants, Unicode byte round-tripping, malformed padding detection.
+- **JWT:** Three-part syntax parsing, claim inspection, invalid token rejection.
+- **Storage:** Exact rational conversions across SI and IEC units, decimal rounding limits.
+- **Hash:** Reference vectors for SHA-256 and SHA-512, empty string/file hashing.
 
-### 13.2 Integration/E2E tests
+### 13.2 Integration & E2E tests
 
-- Homepage loads, search navigates to right tool.
-- Tool page shows title, H1, canonical and explanation in server-rendered HTML.
-- Input -> action -> output -> copy works.
-- Page does not send raw tool input to network (instrument test page/network).
-- Dark/light mode, mobile viewport, keyboard focus.
-- Unknown URL returns HTTP 404.
-- Production build contains sitemap and expected canonical paths.
+- Navigation from homepage search directly to selected tools.
+- Verification of static HTML rendering (H1, title, metadata, instructions).
+- Complete user workflows: Input -> Action -> Output -> Clipboard copy.
+- Network inspection verifying zero outgoing requests containing user inputs.
+- Theme persistence, mobile viewports, and keyboard navigation.
+- 404 route handling.
+- Build output validation confirming sitemaps, canonical tags, and static assets.
 
-### 13.3 Quality gates
+### 13.3 Automated quality gates
 
-For each PR:
+Every pull request must satisfy:
 
 ```text
-format/lint (when configured)
-    -> type check
-    -> unit tests
-    -> Astro build
-    -> SEO/static smoke checks
-    -> E2E on critical flows (or nightly if slow)
+pnpm format:check
+    -> pnpm check (Astro check + Worker typecheck)
+    -> pnpm test (Vitest unit tests)
+    -> pnpm build (Static build output)
+    -> pnpm test:static (Link, metadata, and indexing validator)
+    -> pnpm test:e2e (Playwright cross-browser suite)
 ```
-
-Thêm dependency audit và periodic updates; không để PR merge nếu build/unit tests fail.
 
 ## 14. CI/CD and environments
 
-### 14.1 Git branches
+### 14.1 Git branch workflow
 
-- `main`: production.
-- Feature branches -> PR -> required checks.
-- Deploy preview theo PR nếu Cloudflare integration được cấu hình, **không index preview URLs**.
+- `main`: Protected production branch.
+- Feature branches submit Pull Requests triggering automated CI checks.
+- Preview deployments on PRs enforce `noindex` headers.
 
-### 14.2 Example GitHub Actions CI
+### 14.2 GitHub Actions CI workflow
 
 ```yaml
 name: CI
@@ -713,153 +691,107 @@ jobs:
       - run: pnpm run check
       - run: pnpm run test
       - run: pnpm run build
+      - run: pnpm run test:static
+      - run: pnpm exec playwright install chromium
+      - run: pnpm run test:e2e
 ```
-
-> Pin Actions to reviewed versions/commit SHAs theo chính sách supply-chain khi triển khai thực tế. `pnpm/action-setup` và `setup-node` version chỉ là ví dụ. E2E có thể chạy job riêng để giữ build nhanh.
 
 ### 14.3 Deployment strategy
 
-**Lựa chọn khuyến nghị v1:** Connect GitHub repo vào **Cloudflare Workers Builds** và dùng:
+**Recommended configuration:** Link the GitHub repository to **Cloudflare Workers Builds**:
 
-- Build: `pnpm run build`.
-- Deploy: `pnpm exec wrangler deploy`.
-- Không bật `astro add cloudflare` adapter vì v1 dùng SSG.
-- GitHub Actions chỉ kiểm tra code; **không đồng thời deploy** nếu Workers Builds đã đảm nhiệm deploy.
-
-Alternative: GitHub Actions triển khai Wrangler với token quyền tối thiểu. Chọn một workflow sau khi kiểm tra preview, rollback và quyền access.
+- Build command: `pnpm run build`
+- Deploy command: `pnpm exec wrangler deploy`
+- Pure static builds require no SSR adapter.
+- GitHub Actions handles code quality gates; Cloudflare Git integration handles deployment.
 
 ### 14.4 Operational checklist
 
-- DNS/SSL/domain ownership, redirects `www`/apex canonical.
-- Production custom 404.
-- Worker/static asset deployment verification.
-- Build alert, availability checks nhẹ nếu cần; không dựng monitoring platform.
-- Dependency updates định kỳ, backup repo/content.
-- Analytics/GSC inspection và Core Web Vitals audit định kỳ.
-- Document cách rollback deployment.
+- Verification of apex and `www` canonical domain redirects and SSL certificates.
+- Custom 404 page validation.
+- Deployment verification across edge POPs.
+- Automated dependency audits via Dependabot or equivalent.
+- Ongoing Search Console and Core Web Vitals audits.
+- Documented rollback procedures via prior commit deployments.
 
-## 15. Estimated ongoing operational footprint
+## 15. Operational footprint & economics
 
-Không có revenue/cost forecast từ benchmark đáng tin cậy cho InfraTrove tại thời điểm này. Về kiến trúc, dự kiến:
+In the initial architecture:
 
-- Hosting static: chi phí CDN thấp với Cloudflare Static Assets, tuân theo pricing/limits hiện hành.
-- Domain: chi phí đăng ký/gia hạn hằng năm.
-- CI: chạy khi build/test; tối ưu frequency nếu cần.
-- Analytics/CMP/Ads tools: có thể phát sinh phí theo vendor/traffic.
-- Maintenance chủ yếu ở dependency updates, correctness tests, content/SEO, policy updates — **không phải vận hành application servers**.
+- **Static Hosting:** Minimal cost via Cloudflare Workers Static Assets under standard edge delivery terms.
+- **Domain:** Annual apex domain registration and renewal fees.
+- **CI Compute:** Standard GitHub Actions runners for test and build validation.
+- **Analytics/Tools:** Privacy-compliant services operating within free or predictable tiers.
+- **Maintenance:** Routine dependency patching, correctness tests, and editorial guide updates — **no server infrastructure management**.
 
-Không nên tính giá trị thời gian founder là 0 khi đánh giá hiệu quả kinh doanh.
-
-## 16. Implementation roadmap (không gắn ETA cứng)
+## 16. Implementation roadmap
 
 ### Phase A — Foundation
 
-- [ ] Tạo repo với Astro/React/TypeScript/Tailwind.
-- [ ] Chốt URL canonical convention, domain ownership và deploy environments.
-- [ ] Layout, theme, typography, favicon, global components.
-- [ ] Homepage, Tool Directory, category/filter/search.
-- [ ] Blog Content Collections + 1 mẫu bài.
-- [ ] Sitemap, robots, canonical, OG, 404, policy pages.
-- [ ] CI, static deploy, basic E2E.
+- [x] Repository initialized with Astro 7, React 19, TypeScript, and Tailwind 4.
+- [x] Canonical URL configuration, static asset deployment setup.
+- [x] Warm paper design tokens, global layout shell, and accessible primitives.
+- [x] Homepage, Tool Directory, search filtering, and localized navigation.
+- [x] Content Collections for bilingual guides (`en/` and `vi/`).
+- [x] Sitemap, robots.txt, canonical links, and custom 404 page.
+- [x] Full CI test suite (Vitest + Playwright + Static checker).
 
-**Exit:** domain phục vụ HTML đúng, robots/sitemap/canonical hoạt động và có thể thêm tool độc lập mà không copy layout.
+### Phase B — Core & Expansion Tools
 
-### Phase B — First tool batch
+- [x] 8 core utilities launched and verified.
+- [x] Batch 1 expansion completed: YAML ↔ JSON Converter, JWT Decoder, Storage Unit Converter, Hash & Checksum.
+- [x] 4 comprehensive companion guides published in English and Vietnamese.
+- [ ] Evaluate next priority queue starting with Upload / Restore Time Calculator.
+- [ ] Maintain unit test suites and privacy threat reviews for every addition.
 
-- Baseline cập nhật 2026-10-26: 8 tools core đã có implementation; không đánh dấu public launch hoặc SEO validation đã hoàn tất từ việc này.
-- [x] Triển khai đợt mở rộng theo product spec: YAML ↔ JSON, JWT Decoder, Storage Unit Converter, Hash & Checksum; bốn hướng dẫn đủ bản Anh/Việt, không route rỗng.
-- [ ] Đánh giá hàng đợi tiếp theo, bắt đầu với Upload / Restore Time Calculator.
-- [ ] Logic tests và privacy threat review cho từng tool.
-- [ ] Example data, errors, copy, reset, keyboard/mobile UX.
-- [ ] Related tools + how-to content.
-- [ ] SEO/performance E2E smoke pass.
+### Phase C — SEO, Content & Measurement
 
-**Exit:** mỗi tool giải quyết được tác vụ thật, không crash ở edge cases phổ biến.
+- [ ] Ongoing publication of high-intent technical guides.
+- [ ] Search Console verification and indexing monitoring.
+- [ ] Privacy-safe aggregate analytics reporting.
+- [ ] Query growth analysis to guide future tool selections.
 
-### Phase C — SEO content and measurement
+### Phase D — Monetization Readiness
 
-- [ ] Publishing pipeline cho blog, how-to guides.
-- [ ] Setup GSC; verify index/canonical.
-- [ ] Analytics events tối thiểu, không có raw user content.
-- [ ] Theo dõi impressions/clicks và interaction signals.
-- [ ] Dùng evidence để chọn batch tiếp theo.
-
-**Exit:** biết trang nào có tín hiệu acquisition, trang nào cần cải thiện, không chỉ đếm số URL.
-
-### Phase D — Ads readiness
-
-- [ ] Review content quality, About/Privacy/Contact.
-- [ ] Consent/CMP theo requirements, áp dụng phân loại sensitivity.
-- [ ] Chỉ đặt ad slots ở nơi không làm gián đoạn utility.
-- [ ] Kiểm tra CLS, accessibility, policy compliance.
-- [ ] Khi đủ điều kiện, submit mạng Ads; đo revenue/Page RPM sau khi approved.
-
-**Exit:** monetization không làm mất niềm tin vào browser-side tools.
+- [ ] Content quality and policy compliance review.
+- [ ] CMP consent management integration.
+- [ ] Strict isolation of ad placements away from utility workspaces.
+- [ ] AdSense submission and verification.
 
 ## 17. Definition of Done
 
-Một website/tool được coi là sẵn sàng launch khi:
+A tool or page is considered production-ready when:
 
-- [ ] Có giá trị thực tế với use case đã chọn; không chỉ landing page.
-- [ ] Có HTML tĩnh chứa main SEO content, title/H1/canonical đúng.
-- [ ] Tool chạy trong browser và có test edge cases.
-- [ ] Input không bị gửi/ghi log ra ngoài ý muốn.
-- [ ] Mobile/responsive/keyboard accessibility được kiểm tra.
-- [ ] Không có lỗi nghiêm trọng ở console hoặc broken links.
-- [ ] Unit tests, Astro build, E2E smoke pass.
-- [ ] Sitemap, robots và 404 hoạt động đúng.
-- [ ] Policy pages, privacy descriptions phù hợp thực tế.
-- [ ] Third-party scripts/Ads được rà soát theo data sensitivity.
+- [ ] Delivers genuine user utility for its stated task; not a hollow landing page.
+- [ ] Delivers pre-rendered HTML containing complete SEO metadata, instructions, and canonical tags.
+- [ ] Executes entirely in the user's browser with verified edge-case test coverage.
+- [ ] Zero leakage of user inputs to network endpoints, logs, or analytics.
+- [ ] Tested across mobile, tablet, and desktop screen widths with full keyboard accessibility.
+- [ ] Zero console errors or broken links.
+- [ ] All automated quality gates pass: `format:check`, `check`, `test`, `build`, `test:static`, `test:e2e`.
+- [ ] Fully aligned with `DESIGN.md` tokens.
+- [ ] Accompanied by bilingual documentation guides (`en/` and `vi/`).
 
-## 18. Key trade-offs, risks and open decisions
+## 18. Decision log & references
 
-| Vấn đề | Mặc định | Điểm cần kiểm chứng |
-|---|---|---|
-| Astro major | Latest stable tested (7.x tại 24/10/2026) | Compatibility với integrations, Node patch version |
-| React islands | Có cho interactive tools | Bundle size so với vanilla JS ở very-small tools |
-| CodeMirror | Chỉ tool cần editing thật | Byte weight/performance |
-| Static-only hosting | Có | Có tool nào thực sự cần server không? |
-| Ads trên tool pages | Hạn chế mạnh | Privacy, consent, monetization impact |
-| Search/favorites | Local only | User cần cross-device không? Chưa có evidence |
-| SEO tool priority | Chưa chốt | Keyword research + SERP audit |
-| Content CMS | Git Markdown | Editorial workflow có phức tạp khi scale không? |
-| Multi-language | Chưa triển khai | English-first thực sự là lựa chọn tốt? |
+### 18.1 Key architectural decisions
 
-### 18.1 Decision log
+- **2026-10-24:** Selected **Astro SSG + React Islands + TypeScript + Tailwind 4 + Markdown/MDX + Cloudflare Workers Static Assets**.
+- **2026-10-24:** Confirmed **Astro 7** as stable baseline; rejected unverified runtime adapters.
+- **2026-10-24:** Zero default backend, database, authentication, or enterprise SaaS dependencies.
+- **2026-10-26:** Deployed Batch 1 expansion bringing live catalog to 12 tools with bilingual guides and refreshed warm paper design system.
 
-- **2026-10-24:** Chốt kiến trúc đề xuất **Astro SSG + React Islands + TypeScript + Tailwind + Markdown/MDX + Cloudflare Workers Static Assets**.
-- **2026-10-24:** Cập nhật câu trả lời trước: Astro 6 là version đã nhắc trong trao đổi; bản stable mới nhất đã lên **Astro 7**, nên implementation dùng release stable được kiểm tra, không cố ghim Astro 6 chỉ vì câu trả lời cũ.
-- **2026-10-24:** Không mặc định có backend, database, auth, SaaS hoặc monitoring application.
-- **2026-10-24:** Giữ trọng tâm **SEO + free tools + content + Ads** và xử lý privacy-first.
+### 18.2 Official references
 
-## 19. References (checked 2026-10-24)
-
-Primary/official docs:
-
-1. Astro 7 release: https://astro.build/blog/astro-7/
-2. Astro install requirements: https://docs.astro.build/en/install-and-setup/
-3. Astro routing and static paths: https://docs.astro.build/en/guides/routing/
-4. Astro hydration directives: https://docs.astro.build/en/reference/directives-reference/
-5. Astro Content Collections: https://docs.astro.build/en/guides/content-collections/
-6. Astro Styling / Tailwind: https://docs.astro.build/en/guides/styling/
-7. Astro Deploy to Cloudflare: https://docs.astro.build/en/guides/deploy/cloudflare/
-8. Cloudflare Workers Static Assets: https://developers.cloudflare.com/workers/static-assets/
-9. Cloudflare Workers static site + 404: https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/
-10. Cloudflare Workers static asset billing: https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
-11. Google Search people-first content: https://developers.google.com/search/docs/fundamentals/creating-helpful-content
-12. Google SEO Starter Guide: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
-13. Google JavaScript SEO: https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics
-14. Web Vitals: https://web.dev/articles/vitals
-15. Web Crypto API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API
-
-**Data limitations:** Tài liệu này xác minh định hướng framework/hosting theo tài liệu công khai, **không** xác minh organic search volumes, Page RPM, competitor SEO difficulty, conversion hoặc chi phí thực tế của InfraTrove. Những thông số đó thuộc Market Research và Analytics sau launch.
+1. Astro Documentation: https://docs.astro.build/
+2. Cloudflare Workers Static Assets: https://developers.cloudflare.com/workers/static-assets/
+3. Google Search Essentials: https://developers.google.com/search/docs/essentials
+4. Web Vitals: https://web.dev/articles/vitals
+5. Web Crypto API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API
+6. NIST Binary Prefixes: https://pml.nist.gov/cuu/Units/binary.html
 
 ---
 
 ## One-page implementation brief
 
-**InfraTrove = Astro SSG website phục vụ HTML tĩnh cho SEO; React Islands xử lý từng tool trên browser; Markdown/MDX cung cấp nội dung; Cloudflare Workers Static Assets phân phối toàn cầu; CI có test + build; analytics và Ads triển khai có kiểm soát theo privacy.**
-
-**Thứ tự code:** Foundation → 3–5 tools đã được ưu tiên → Blog + SEO → Analytics → Ads.
-
-**Điều không làm:** backend khi chưa cần, SaaS, accounts, cloud cost/monitoring, microservices, và các SEO pages chỉ tồn tại để tăng số lượng URL.
+**InfraTrove delivers high-performance static HTML for organic SEO, hydrates lightweight React islands for in-browser client utilities, presents bilingual editorial guides via Markdown collections, and distributes globally over Cloudflare's static edge with zero tracking and privacy-first engineering.**

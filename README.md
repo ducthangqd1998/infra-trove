@@ -40,7 +40,7 @@ To add a tool, add tested logic/UI, a direct `.astro` route, registry metadata, 
 
 ## Scope decisions
 
-Twelve tools are implemented: JSON, text compare, cron, timestamp, password, Base64, URL encoding, UUID, YAML ↔ JSON, JWT Decoder, Storage Unit Converter and Hash & Checksum. The [tool roadmap](plans/feature.md) is the source of truth for planned additions and their scope, updated on 2026-10-26.
+Twelve tools are implemented: JSON, text compare, cron, timestamp, password, Base64, URL encoding, UUID, YAML ↔ JSON, JWT Decoder, Storage Unit Converter and Hash & Checksum. The [tool roadmap](plans/feature.md) is the source of truth for planned additions and their scope, updated on 2026-10-26. Architectural foundations and technical requirements are detailed in [plans/techstack.md](plans/techstack.md), and community benchmarks are tracked in [TOOLS_UX_REFERENCES.md](TOOLS_UX_REFERENCES.md).
 
 The completed expansion batch adds **YAML ↔ JSON, JWT Decoder, Storage Unit Converter and Hash & Checksum**, with four guides in both English and Vietnamese. YAML accepts one YAML 1.2 core document (100,000 characters), rejects aliases/custom tags and does not preserve comments. JWT decoding does not verify signatures. Hash supports SHA-256/SHA-512 with a 32 MiB file limit. The next queue starts with **Upload / Restore Time Calculator**, then SQL Formatter, JSON ↔ CSV, Regex Tester, IPv4 / CIDR and chmod. Later candidates include Text Utilities, HTML Escape / Unescape, static QR codes, JSON Diff and Backup Storage Calculator.
 
