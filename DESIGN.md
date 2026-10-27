@@ -373,6 +373,10 @@ so iOS does not zoom.
   to a 22rem rail (`--rail-w`) on the right, and the related tools sit under the card on the left,
   so both columns end together and no side of the page stays empty. Below 1600px the panels stay
   below the card, as on every tool under 1024px.
+- **Guide header:** title, lead and byline on the left; on the right a framed flat illustration
+  (`PostArt.astro`, one scene per guide) drawn only from tokens: `soft` stage with faint accent arcs,
+  `ink` outlines, `surface` and `code` fills, heat scale for emphasis. Decorative (`aria-hidden`), no
+  text inside, hidden below 768px so reading starts at once. A guide with no scene gets a generic page.
 - **Guides:** article column up to 46rem plus a 16rem sticky "On this page" panel that starts level
   with the title and marks the section being read (`aria-current="location"`). Below 1024px the panel
   sits under the title, collapsed. The index is one four-column grid of compact cards (the newest carries a "Latest article" badge). Code blocks carry a language and copy bar,

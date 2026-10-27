@@ -5,6 +5,15 @@ interface Props {
   slug: string;
 }
 const { slug } = Astro.props;
+const scenes = [
+  'jwt-claims-without-verification',
+  'storage-units-gb-gib',
+  'verify-file-checksum',
+  'yaml-json-conversion',
+  'base64-vs-base64url',
+  'json-trailing-commas',
+  'unix-cron-basics',
+];
 const hex = ['h1', 'h2', 'paper', 'h3', 'paper', 'h2', 'h1', 'paper'];
 const cells = [...Array(10).keys()];
 const calendar = [...Array(15).keys()];
@@ -302,6 +311,31 @@ const lit = new Set([2, 5, 6, 11]);
         </g>
       ))}
       <path class="a-ink a-bare a-dash" d="M142 176v36M338 184v28" />
+    </g>
+  )}
+  {/* A guide without its own scene still gets a framed page. */}
+  {!scenes.includes(slug) && (
+    <g>
+      <rect
+        class="a-ink f-paper"
+        x="150"
+        y="48"
+        width="180"
+        height="224"
+        rx="16"
+      />
+      <rect class="f-h2" x="176" y="84" width="70" height="10" rx="5" />
+      <rect class="f-line" x="176" y="118" width="128" height="8" rx="4" />
+      <rect class="f-line" x="176" y="142" width="104" height="8" rx="4" />
+      <rect class="f-line" x="176" y="166" width="118" height="8" rx="4" />
+      <rect
+        class="a-ink f-code"
+        x="176"
+        y="196"
+        width="128"
+        height="44"
+        rx="8"
+      />
     </g>
   )}
 </svg>

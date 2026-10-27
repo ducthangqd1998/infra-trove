@@ -283,6 +283,31 @@ test('guide code blocks copy, tables scroll and related guides follow', async ({
   const related = page.getByRole('region', { name: 'Keep reading' });
   await expect(related.locator('[data-post]')).toHaveCount(2);
 });
+test('every guide opens with its own illustration, in both languages', async ({
+  page,
+}) => {
+  const slugs = [
+    'base64-vs-base64url',
+    'json-trailing-commas',
+    'jwt-claims-without-verification',
+    'storage-units-gb-gib',
+    'unix-cron-basics',
+    'verify-file-checksum',
+    'yaml-json-conversion',
+  ];
+  for (const slug of slugs)
+    for (const base of ['/blog/', '/vi/blog/']) {
+      await page.goto(`${base}${slug}/`);
+      // Each scene draws more than the stage and arcs; the art is decorative.
+      expect(
+        await page.locator('.post-art svg.art > g:not(.art-arcs)').count(),
+      ).toBe(1);
+      await expect(page.locator('.post-art svg.art')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+    }
+});
 test('tool pages mark the current tool in the sidebar', async ({
   page,
   isMobile,
