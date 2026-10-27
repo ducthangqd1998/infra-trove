@@ -10,7 +10,6 @@ const { lang } = Astro.props;
 const t = blogText[lang];
 const posts = await getPosts(lang);
 const categories = [...new Set(posts.map((post) => post.data.category))];
-const [featured, ...rest] = posts;
 ---
 
 <BaseLayout
@@ -48,29 +47,60 @@ const [featured, ...rest] = posts;
         ))}
       </nav>
     </div>
-    {featured && <PostCard post={featured} tone={0} featured />}
+    <p
+      class="blog-count js-only"
+      role="status"
+      data-template={t.resultCount}
+      data-total={posts.length}
+    ></p>
     <div class="post-grid">
-      {rest.map((post, i) => (
-        <PostCard post={post} tone={i + 1} />
+      {posts.map((post, i) => (
+        <PostCard post={post} heading="h2" latest={i === 0} />
       ))}
     </div>
   </div>
 </BaseLayout>
 <script>
   const buttons = [
-    ...document.querySelectorAll<HTMLButtonElement>('[data-filter]'),
+    ...document.querySelectorAll<HTMLButtonElement>('.tabs [data-filter]'),
   ];
   const cards = [...document.querySelectorAll<HTMLElement>('[data-post]')];
-  buttons.forEach((button) =>
-    button.addEventListener('click', () => {
-      const category = button.dataset.filter || '';
-      buttons.forEach((item) => {
-        item.classList.toggle('active', item === button);
-        item.setAttribute('aria-pressed', String(item === button));
-      });
-      cards.forEach((card) => {
-        card.hidden = category !== '' && card.dataset.category !== category;
-      });
-    }),
-  );
+  const count = document.querySelector<HTMLElement>('.blog-count')!;
+  const categories = new Set(buttons.map((button) => button.dataset.filter));
+
+  function apply(category: string, push: boolean) {
+    if (!categories.has(category)) category = '';
+    buttons.forEach((item) => {
+      const on = (item.dataset.filter || '') === category;
+      item.classList.toggle('active', on);
+      item.setAttribute('aria-pressed', String(on));
+    });
+    let shown = 0;
+    cards.forEach((card) => {
+      const match = category === '' || card.dataset.category === category;
+      card.hidden = !match;
+      if (match) shown += 1;
+    });
+    // Only announce once someone filters; the unfiltered page needs no status.
+    count.textContent = category
+      ? (count.dataset.template ?? '')
+          .replace('{n}', String(shown))
+          .replace('{total}', count.dataset.total ?? '')
+      : '';
+    if (push) {
+      const url = new URL(location.href);
+      if (category) url.searchParams.set('category', category);
+      else url.searchParams.delete('category');
+      history.replaceState(null, '', url);
+    }
+  }
+
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-filter]')
+    .forEach((button) =>
+      button.addEventListener('click', () =>
+        apply(button.dataset.filter || '', true),
+      ),
+    );
+  apply(new URLSearchParams(location.search).get('category') ?? '', false);
 </script>

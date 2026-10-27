@@ -1,0 +1,307 @@
+---
+// One flat line illustration per guide, drawn from the design tokens so it
+// follows light and dark. Decorative: the article text carries the meaning.
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const hex = ['h1', 'h2', 'paper', 'h3', 'paper', 'h2', 'h1', 'paper'];
+const cells = [...Array(10).keys()];
+const calendar = [...Array(15).keys()];
+const lit = new Set([2, 5, 6, 11]);
+---
+
+<svg
+  class="art"
+  viewBox="0 0 480 320"
+  role="presentation"
+  aria-hidden="true"
+  focusable="false"
+>
+  <rect class="art-stage" width="480" height="320"></rect>
+  <g class="art-arcs">
+    <circle cx="410" cy="50" r="44"></circle>
+    <circle cx="410" cy="50" r="88"></circle>
+    <circle cx="410" cy="50" r="132"></circle>
+    <circle cx="410" cy="50" r="176"></circle>
+  </g>
+
+  {slug === 'jwt-claims-without-verification' && (
+    <g transform="translate(0 10)">
+      <rect
+        class="a-ink f-paper"
+        x="70"
+        y="56"
+        width="340"
+        height="64"
+        rx="14"
+      />
+      <path
+        class="a-ink f-h1"
+        d="M70 70a14 14 0 0 1 14-14h66v64H84a14 14 0 0 1-14-14Z"
+      />
+      <rect class="a-ink f-h2" x="150" y="56" width="140" height="64" />
+      <path
+        class="a-ink f-h3"
+        d="M290 56h106a14 14 0 0 1 14 14v36a14 14 0 0 1-14 14H290Z"
+      />
+      <circle class="f-ink" cx="150" cy="88" r="5" />
+      <circle class="f-ink" cx="290" cy="88" r="5" />
+      <path
+        class="a-ink a-bare"
+        d="M110 120c0 26-20 26-20 50M220 120v50M350 120c0 26 20 26 20 50"
+      />
+      <rect
+        class="a-ink f-paper"
+        x="40"
+        y="170"
+        width="100"
+        height="96"
+        rx="12"
+      />
+      <rect class="f-line" x="56" y="192" width="68" height="8" rx="4" />
+      <rect class="f-line" x="56" y="212" width="48" height="8" rx="4" />
+      <rect class="f-line" x="56" y="232" width="58" height="8" rx="4" />
+      <rect
+        class="a-ink f-paper"
+        x="170"
+        y="170"
+        width="100"
+        height="96"
+        rx="12"
+      />
+      <rect class="f-line" x="186" y="192" width="68" height="8" rx="4" />
+      <rect class="f-line" x="186" y="212" width="58" height="8" rx="4" />
+      <rect class="f-line" x="186" y="232" width="40" height="8" rx="4" />
+      <rect
+        class="a-ink f-paper a-dash"
+        x="300"
+        y="170"
+        width="140"
+        height="96"
+        rx="12"
+      />
+      <rect class="a-ink f-h1" x="352" y="214" width="36" height="30" rx="6" />
+      <path class="a-ink a-bare" d="M360 214v-12a10 10 0 0 1 20 0" />
+      <circle class="f-ink" cx="370" cy="229" r="3.5" />
+    </g>
+  )}
+
+  {slug === 'storage-units-gb-gib' && (
+    <g>
+      <path class="a-ink f-paper" d="M100 168v76a50 14 0 0 0 100 0v-76Z" />
+      <ellipse class="a-ink f-paper" cx="150" cy="168" rx="50" ry="14" />
+      <path
+        class="a-ink a-bare a-faint"
+        d="M100 196a50 14 0 0 0 100 0M100 220a50 14 0 0 0 100 0"
+      />
+      <path class="a-ink f-h1" d="M290 140v104a50 14 0 0 0 100 0V140Z" />
+      <ellipse class="a-ink f-h2" cx="340" cy="140" rx="50" ry="14" />
+      <path
+        class="a-ink a-bare a-faint"
+        d="M290 170a50 14 0 0 0 100 0M290 200a50 14 0 0 0 100 0M290 228a50 14 0 0 0 100 0"
+      />
+      <path class="a-ink a-bare a-dash" d="M150 154H410" />
+      <path class="a-ink a-bare" d="M418 140v28m-6-22 6-6 6 6m-12 16 6 6 6-6" />
+      <path class="a-ink a-bare" d="M222 196h48M222 214h48M232 184l28 42" />
+    </g>
+  )}
+
+  {slug === 'verify-file-checksum' && (
+    <g>
+      <path class="a-ink f-paper" d="M60 70h76l34 34v138H60Z" />
+      <path class="a-ink a-bare" d="M136 70v34h34" />
+      <rect class="f-line" x="80" y="130" width="70" height="8" rx="4" />
+      <rect class="f-line" x="80" y="152" width="54" height="8" rx="4" />
+      <rect class="f-line" x="80" y="174" width="64" height="8" rx="4" />
+      <rect class="f-line" x="80" y="196" width="40" height="8" rx="4" />
+      <path class="a-ink a-bare" d="M186 150h36m-10-9 10 9-10 9" />
+      {hex.map((tone, i) => (
+        <rect
+          class={`a-ink f-${tone}`}
+          x={238 + i * 28}
+          y="96"
+          width="24"
+          height="24"
+          rx="5"
+        />
+      ))}
+      {hex.map((tone, i) => (
+        <rect
+          class={`a-ink f-${tone}`}
+          x={238 + i * 28}
+          y="136"
+          width="24"
+          height="24"
+          rx="5"
+        />
+      ))}
+      <path class="a-ink a-bare" d="M350 170v28" />
+      <circle class="a-ink f-accent" cx="350" cy="228" r="30" />
+      <path class="a-ink a-bare" d="m336 228 10 10 20-22" />
+    </g>
+  )}
+
+  {slug === 'yaml-json-conversion' && (
+    <g>
+      <rect
+        class="a-ink f-paper"
+        x="44"
+        y="62"
+        width="156"
+        height="196"
+        rx="14"
+      />
+      <circle class="f-h2" cx="70" cy="96" r="5" />
+      <rect class="f-line" x="84" y="92" width="86" height="8" rx="4" />
+      <rect class="f-line" x="70" y="122" width="60" height="8" rx="4" />
+      <circle class="f-h2" cx="94" cy="150" r="5" />
+      <rect class="f-line" x="108" y="146" width="56" height="8" rx="4" />
+      <circle class="f-h2" cx="94" cy="176" r="5" />
+      <rect class="f-line" x="108" y="172" width="44" height="8" rx="4" />
+      <rect class="f-line" x="70" y="202" width="72" height="8" rx="4" />
+      <rect class="f-line" x="70" y="226" width="40" height="8" rx="4" />
+      <rect
+        class="a-ink f-code"
+        x="280"
+        y="62"
+        width="156"
+        height="196"
+        rx="14"
+      />
+      <path
+        class="a-ink a-bare"
+        d="M310 98c-12 0-12 6-12 18s-6 14-10 14c4 0 10 2 10 14s0 18 12 18M406 98c12 0 12 6 12 18s6 14 10 14c-4 0-10 2-10 14s0 18-12 18"
+      />
+      <rect class="f-h1" x="326" y="110" width="30" height="8" rx="4" />
+      <rect class="f-line" x="362" y="110" width="26" height="8" rx="4" />
+      <rect class="f-h1" x="326" y="138" width="40" height="8" rx="4" />
+      <rect class="f-line" x="372" y="138" width="16" height="8" rx="4" />
+      <rect class="f-h1" x="326" y="166" width="24" height="8" rx="4" />
+      <rect class="f-line" x="356" y="166" width="32" height="8" rx="4" />
+      <path
+        class="a-ink a-bare"
+        d="M218 130h44m-10-9 10 9-10 9M262 190h-44m10-9-10 9 10 9"
+      />
+    </g>
+  )}
+
+  {slug === 'base64-vs-base64url' && (
+    <g>
+      {cells.map((i) => (
+        <rect
+          class={`a-ink ${i === 3 || i === 7 ? 'f-h3' : 'f-paper'}`}
+          x={73 + i * 34}
+          y="72"
+          width="28"
+          height="28"
+          rx="6"
+        />
+      ))}
+      <path class="a-ink a-bare a-bold" d="M182 86h14m-7-7v14M331 79l-12 14" />
+      <path class="a-ink a-bare" d="M240 118v54m-9-12 9 12 9-12" />
+      <rect
+        class="a-ink a-dash f-paper"
+        x="52"
+        y="190"
+        width="376"
+        height="62"
+        rx="31"
+      />
+      {cells.map((i) => (
+        <rect
+          class={`a-ink ${i === 3 || i === 7 ? 'f-accent' : 'f-paper'}`}
+          x={73 + i * 34}
+          y="207"
+          width="28"
+          height="28"
+          rx="6"
+        />
+      ))}
+      <path class="a-ink a-bare a-bold" d="M182 221h14M318 230h14" />
+    </g>
+  )}
+
+  {slug === 'json-trailing-commas' && (
+    <g>
+      <rect
+        class="a-ink f-paper"
+        x="90"
+        y="48"
+        width="300"
+        height="224"
+        rx="16"
+      />
+      <path
+        class="a-ink a-bare"
+        d="M124 78c-14 0-14 6-14 18v42c0 8-6 12-12 12 6 0 12 4 12 12v42c0 12 0 18 14 18"
+      />
+      <rect class="f-h2" x="134" y="86" width="56" height="9" rx="4.5" />
+      <rect class="f-line" x="198" y="86" width="96" height="9" rx="4.5" />
+      <rect class="f-h2" x="134" y="124" width="72" height="9" rx="4.5" />
+      <rect class="f-line" x="214" y="124" width="70" height="9" rx="4.5" />
+      <rect class="f-h2" x="134" y="162" width="48" height="9" rx="4.5" />
+      <rect class="f-line" x="190" y="162" width="84" height="9" rx="4.5" />
+      <path
+        class="a-red"
+        d="M134 184q6-6 12 0t12 0 12 0 12 0 12 0 12 0 12 0 12 0 12 0 12 0"
+      />
+      <circle class="a-ink f-h3" cx="326" cy="166" r="20" />
+      <circle class="f-ink" cx="326" cy="162" r="4.5" />
+      <path class="a-ink a-bare" d="M326 166q0 9-6 13" />
+      <circle class="a-ink f-h3" cx="400" cy="52" r="24" />
+      <path class="a-ink a-bare" d="m391 43 18 18m0-18-18 18" />
+    </g>
+  )}
+
+  {slug === 'unix-cron-basics' && (
+    <g>
+      <circle class="a-ink f-paper" cx="142" cy="112" r="64" />
+      <path
+        class="a-ink a-bare a-faint"
+        d="M142 56v8M142 160v8M86 112h8M190 112h8M114 63l4 7M170 63l-4 7M114 161l4-7M170 161l-4-7"
+      />
+      <path class="a-ink a-bare" d="M142 112V76M142 112l26 14" />
+      <circle class="a-ink f-h2" cx="142" cy="112" r="6" />
+      <rect
+        class="a-ink f-paper"
+        x="248"
+        y="48"
+        width="180"
+        height="136"
+        rx="14"
+      />
+      <path
+        class="a-ink f-h2"
+        d="M248 62a14 14 0 0 1 14-14h152a14 14 0 0 1 14 14v18H248Z"
+      />
+      {calendar.map((i) => (
+        <rect
+          class={`a-ink ${lit.has(i) ? 'f-h1' : 'f-paper'}`}
+          x={266 + (i % 5) * 32}
+          y={94 + Math.floor(i / 5) * 28}
+          width="24"
+          height="20"
+          rx="5"
+        />
+      ))}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <g>
+          <rect
+            class={`a-ink ${i === 1 ? 'f-h1' : 'f-paper'}`}
+            x={66 + i * 72}
+            y="224"
+            width="60"
+            height="52"
+            rx="12"
+          />
+          <path
+            class="a-ink a-bare"
+            d={`M${96 + i * 72} 240v20m-9-15 18 10m0-10-18 10`}
+          />
+        </g>
+      ))}
+      <path class="a-ink a-bare a-dash" d="M142 176v36M338 184v28" />
+    </g>
+  )}
+</svg>

@@ -13,7 +13,12 @@ const { tool } = Astro.props;
   data-tool-card
   data-slug={tool.slug}
   data-category={tool.category}
-  data-search={`${tool.title} ${tool.category} ${tool.tags.join(' ')}`.toLowerCase()}
+  data-search={JSON.stringify({
+    slug: tool.slug,
+    title: tool.title,
+    summary: tool.summary,
+    tags: [...tool.tags, tool.category],
+  })}
 >
   <div class="card-top">
     <span class="tool-symbol" aria-hidden="true">

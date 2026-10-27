@@ -328,9 +328,8 @@ first paint.
   alone.
 - **Heat-1/2/3 (amber, orange, red):** reserved for decorative heat scales. Never used as status
   colours; the home directory does not use charts.
-- **Band-from / band-to:** the only gradient that carries text (CTA band, guide covers), with
-  `on-band` white text at 6.5:1 or more. Guide covers use three dark warm pairs in
-  `.cover[data-tone]` (amber-700 to orange-700, orange-700 to red-700, amber-800 to orange-800).
+- **Band-from / band-to:** the only gradient that carries text (the CTA band), with
+  `on-band` white text at 6.5:1 or more.
 
 ## Typography
 
@@ -374,7 +373,10 @@ so iOS does not zoom.
   to a 22rem rail (`--rail-w`) on the right, and the related tools sit under the card on the left,
   so both columns end together and no side of the page stays empty. Below 1600px the panels stay
   below the card, as on every tool under 1024px.
-- **Guides:** article column up to 46rem plus a 16rem sticky "On this page" panel.
+- **Guides:** article column up to 46rem plus a 16rem sticky "On this page" panel that starts level
+  with the title and marks the section being read (`aria-current="location"`). Below 1024px the panel
+  sits under the title, collapsed. The index is one four-column grid of compact cards (the newest carries a "Latest article" badge). Code blocks carry a language and copy bar,
+  wide tables scroll inside a focusable region, and "Keep reading" closes the article.
 - **Home:** a utility directory. Compact title and task description on the left, labelled search
   on the right, stacked below 900px. A plain line explains that no account is needed and tool input
   stays in the browser. Category filters, Favorites and tool cards follow immediately; latest
@@ -401,7 +403,8 @@ directory.
   edge, hover fill `hover`. Min height 44px. Labels may carry a trailing arrow icon.
 - **Cards** (tools, guides): header row (icon tile + tag), body (title, one-line summary), footer
   separated by a hairline: metadata left (tags or reading time), small bordered "Open tool" or
-  "Read guide" button right. The whole card is one link (stretched title link).
+  "Read guide" button right. Guide cards are compact: a 16px icon with the category, title, two-line
+  summary, then reading time and "Read article" with no tile or footer rule. The whole card is one link (stretched title link).
 - **Badge / eyebrow:** `soft` fill, `accent-text`, thin orange edge, pill.
 - **Tabs:** text tabs with a 2px orange underline on the selected one.
 - **Segmented control** (guide language, tool options): grey track; the selected segment is surface
@@ -435,16 +438,15 @@ directory.
   icons are `aria-hidden`. Unicode glyphs are not used as icons. Each tool has its own icon in
   `src/components/ToolIcon.astro` (same 24px grid and stroke), shown in a `tool-symbol` tile: 44px
   (48px on cards), `tile` radius, surface-to-`soft` gradient, orange-tinted edge, `accent-text` icon;
-  on card hover or focus the tile fills with `accent` and the icon turns `on-accent`. Guide covers
-  show the same icon large in white.
+  on card hover or focus the tile fills with `accent` and the icon turns `on-accent`.
 
 ## Do's and Don'ts
 
 - Do keep warmth in the canvas, the orange accent and the heat scale. Don't add blue, indigo or
   purple.
 - Do put dark text on orange fills. Don't put white text on orange.
-- Do use gradients only for guide covers, tool icon tiles and the CTA band. Don't put text on a
-  gradient other than the dark band and cover pairs.
+- Do use gradients only for tool icon tiles and the CTA band. Don't put text on a
+  gradient other than the dark band.
 - Do frame cards with hairlines. Don't add shadows to static cards.
 - Do use uppercase only for sidebar group labels. Don't uppercase headings, eyebrows or buttons.
 - Do give every selected, current or pressed state a cue of at least 3:1 (underline, bar, ring), not

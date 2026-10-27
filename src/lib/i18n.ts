@@ -34,6 +34,10 @@ export const blogText: Record<
     commentPosted: string;
     commentError: string;
     commentNote: string;
+    resultCount: string;
+    copyCode: string;
+    copiedCode: string;
+    tableLabel: string;
   }
 > = {
   en: {
@@ -69,6 +73,10 @@ export const blogText: Record<
     commentError: 'Could not post your comment.',
     commentNote:
       'We keep your name and comment. Your IP address is never stored; a fingerprint that changes daily limits spam. Cloudflare Turnstile verification loads only when you start writing.',
+    resultCount: 'Showing {n} of {total} articles',
+    copyCode: 'Copy code',
+    copiedCode: 'Copied',
+    tableLabel: 'Scrollable table',
   },
   vi: {
     indexTitle: 'Hướng dẫn thực hành',
@@ -103,5 +111,9 @@ export const blogText: Record<
     commentError: 'Không gửi được bình luận.',
     commentNote:
       'Chúng tôi lưu tên và nội dung bình luận. Địa chỉ IP của bạn không bao giờ được lưu; một dấu vân tay đổi mỗi ngày dùng để chặn spam. Bước xác minh Cloudflare Turnstile chỉ tải khi bạn bắt đầu viết.',
+    resultCount: 'Hiển thị {n} trong {total} bài viết',
+    copyCode: 'Sao chép mã',
+    copiedCode: 'Đã sao chép',
+    tableLabel: 'Bảng có thể cuộn',
   },
 };

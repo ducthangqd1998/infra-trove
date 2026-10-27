@@ -6,6 +6,7 @@ import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal
 import geistVietnamese from '@fontsource-variable/geist/files/geist-vietnamese-wght-normal.woff2?url';
 import Icon from '../components/Icon.astro';
 import BrandLogo from '../components/BrandLogo.astro';
+import ToolSearch from '../components/ToolSearch.astro';
 import { tools } from '../data/tools';
 interface Props {
   title: string;
@@ -131,7 +132,7 @@ const shareImage = image
       <div class="container header-inner">
         <a class="brand" href="/" aria-label="InfraTrove home">
           <span class="brand-mark" aria-hidden="true">
-            <BrandLogo size={18} />
+            <BrandLogo />
           </span>
           InfraTrove
         </a>
@@ -153,10 +154,17 @@ const shareImage = image
           </a>
         </nav>
         <div class="header-actions">
-          <a href="/tools/#tool-search" class="search-link">
+          <a
+            href="/tools/#tool-search"
+            class="search-link"
+            data-search-open
+            aria-label="Search tools"
+          >
             <Icon name="search" size={16} />
             <span>Search tools</span>
-            <kbd aria-hidden="true">⌘ K</kbd>
+            <kbd aria-hidden="true" data-search-shortcut>
+              ⌘ K
+            </kbd>
           </a>
           <button
             class="icon-button"
@@ -207,6 +215,7 @@ const shareImage = image
         </a>
       </nav>
     </dialog>
+    <ToolSearch />
     <main id="main">
       <slot />
     </main>
@@ -215,7 +224,7 @@ const shareImage = image
         <div class="footer-brand">
           <a class="brand" href="/">
             <span class="brand-mark" aria-hidden="true">
-              <BrandLogo size={18} />
+              <BrandLogo />
             </span>
             InfraTrove
           </a>
@@ -312,14 +321,6 @@ const shareImage = image
         try {
           localStorage.setItem('infratrove-theme', theme);
         } catch {}
-      });
-      document.addEventListener('keydown', (event) => {
-        if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-          event.preventDefault();
-          const search = document.getElementById('tool-search');
-          if (search) search.focus();
-          else window.location.href = '/tools/#tool-search';
-        }
       });
     </script>
   </body>

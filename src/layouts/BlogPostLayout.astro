@@ -2,9 +2,15 @@
 import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import Comments from '../components/Comments.astro';
+import PostCard from '../components/PostCard.astro';
+import PostArt from '../components/PostArt.astro';
+import BrandLogo from '../components/BrandLogo.astro';
 import { getTool } from '../data/tools';
 import { blogText } from '../lib/i18n';
 import {
+  blogHref,
+  formatDate,
+  getPosts,
   postHref,
   postLang,
   postSlug,
@@ -14,7 +20,6 @@ import {
 import { render } from 'astro:content';
 interface Props {
   post: Post;
-  tone?: number;
 }
 const { post } = Astro.props;
 const lang = postLang(post);
@@ -27,6 +32,14 @@ const translationHref = translation
   : null;
 const { Content, headings } = await render(post);
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const indexHref = blogHref(lang);
+
+// Same category first, then the most recently updated; never the current guide.
+const others = (await getPosts(lang)).filter((item) => item.id !== post.id);
+const related = [
+  ...others.filter((item) => item.data.category === post.data.category),
+  ...others.filter((item) => item.data.category !== post.data.category),
+].slice(0, 2);
 
 const siteUrl = Astro.site?.toString() || 'https://infratrove.com';
 const currentHref = postHref(lang, postSlug(post));
@@ -80,10 +93,7 @@ const articleStructuredData = [
         '@type': 'ListItem',
         position: 2,
         name: t.indexTitle,
-        item: new URL(
-          lang === 'vi' ? '/vi/blog/' : '/blog/',
-          siteUrl,
-        ).toString(),
+        item: new URL(indexHref, siteUrl).toString(),
       },
       {
         '@type': 'ListItem',
@@ -107,57 +117,77 @@ const articleStructuredData = [
   structuredData={articleStructuredData}
 >
   <article class="container post-article" lang={lang}>
-    <header class="post-header">
-      <div class="post-header-top">
-        <nav class="breadcrumbs" aria-label="Breadcrumb">
-          <a href={lang === 'vi' ? '/vi/blog/' : '/blog/'}>{t.indexTitle}</a>
-          <span class="breadcrumb-sep" aria-hidden="true">
-            /
-          </span>
-          <span class="breadcrumb-current" aria-current="page">
-            {post.data.category}
-          </span>
-        </nav>
-        {translationHref && (
-          <a
-            class="lang-switch-chip"
-            href={translationHref}
-            hreflang={otherLang}
-          >
-            <Icon name="globe" size={14} />
-            <span>{t.translationLink}</span>
-          </a>
-        )}
-      </div>
-
-      <h1 class="post-title">{post.data.title}</h1>
-      <p class="post-lead">{post.data.description}</p>
-
-      <div class="post-meta">
-        <span class="meta-item">
-          <Icon name="clock" size={14} />
-          <span>{post.data.readingTime}</span>
-        </span>
-        {tool && (
-          <>
-            <span class="meta-dot" aria-hidden="true">
-              ·
-            </span>
-            <a class="meta-tool-link" href={`/tools/${tool.slug}/`}>
-              <span>Companion tool:</span>
-              <strong>{tool.shortTitle}</strong>
-              <Icon name="arrow-up-right" size={13} />
-            </a>
-          </>
-        )}
-      </div>
-    </header>
     <div class="post-layout">
-      <div class="prose">
+      <header class="post-header">
+        <div class="post-hero-text">
+          <div class="post-header-top">
+            <nav class="breadcrumbs" aria-label="Breadcrumb">
+              <a href={indexHref}>{t.indexTitle}</a>
+              <span class="breadcrumb-sep" aria-hidden="true">
+                /
+              </span>
+              <a
+                href={`${indexHref}?category=${encodeURIComponent(post.data.category)}`}
+              >
+                {post.data.category}
+              </a>
+            </nav>
+            {translationHref && (
+              <a
+                class="lang-switch-chip"
+                href={translationHref}
+                hreflang={otherLang}
+                lang={otherLang}
+              >
+                <Icon name="globe" size={14} />
+                <span>{t.translationLink}</span>
+              </a>
+            )}
+          </div>
+
+          <h1 class="post-title">{post.data.title}</h1>
+          <p class="post-lead">{post.data.description}</p>
+
+          <div class="post-meta">
+            <div class="post-byline">
+              <span class="byline-mark">
+                <BrandLogo size={20} />
+              </span>
+              <span class="byline-text">
+                <strong>{t.byline}</strong>
+                <span>
+                  {t.updated}{' '}
+                  <time datetime={post.data.updated}>
+                    {formatDate(post.data.updated, lang)}
+                  </time>
+                  <span aria-hidden="true"> · </span>
+                  {post.data.readingTime}
+                </span>
+              </span>
+            </div>
+            {tool && (
+              <a class="meta-tool-link" href={`/tools/${tool.slug}/`}>
+                <span>Companion tool:</span>
+                <strong>{tool.shortTitle}</strong>
+                <Icon name="arrow-up-right" size={13} />
+              </a>
+            )}
+          </div>
+        </div>
+        <div class="post-art">
+          <PostArt slug={postSlug(post)} />
+        </div>
+      </header>
+      <div
+        class="prose"
+        data-copy={t.copyCode}
+        data-copied={t.copiedCode}
+        data-table={t.tableLabel}
+      >
         <Content />
       </div>
       {toc.length > 1 && (
-        <aside>
+        <aside class="post-aside" aria-label={t.toc}>
           <details class="toc" open>
             <summary>
               <Icon name="list" size={16} />
@@ -193,6 +223,116 @@ const articleStructuredData = [
         </div>
       </footer>
     )}
+    {related.length > 0 && (
+      <section class="post-related" aria-labelledby="related-title">
+        <div class="post-related-head">
+          <h2 id="related-title">{t.related}</h2>
+          <a class="text-link" href={indexHref}>
+            {t.allGuides}
+            <Icon name="arrow" size={15} />
+          </a>
+        </div>
+        <div class="post-grid">
+          {related.map((item) => (
+            <PostCard post={item} />
+          ))}
+        </div>
+      </section>
+    )}
     <Comments post={post.id} lang={lang} />
   </article>
 </BaseLayout>
+<script>
+  const prose = document.querySelector<HTMLElement>('.prose');
+  if (prose) {
+    const { copy = '', copied = '', table = '' } = prose.dataset;
+
+    // Code blocks: an icon button in the corner copies the block.
+    const icon = (d: string) =>
+      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+    const copyIcon = icon('M9 9h10v11H9V9ZM5 15V4h10');
+    const doneIcon = icon('m5 12 4 4 10-10');
+    prose.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'code-block';
+      pre.replaceWith(wrap);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'code-copy';
+      button.setAttribute('aria-label', copy);
+      button.innerHTML = copyIcon;
+      const status = document.createElement('span');
+      status.className = 'sr-only';
+      status.setAttribute('role', 'status');
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.textContent ?? '');
+        } catch {
+          return;
+        }
+        button.innerHTML = doneIcon;
+        button.dataset.done = '';
+        status.textContent = copied;
+        setTimeout(() => {
+          button.innerHTML = copyIcon;
+          delete button.dataset.done;
+          status.textContent = '';
+        }, 1600);
+      });
+      wrap.append(pre, button, status);
+    });
+
+    // Tables scroll sideways inside their own focusable region.
+    prose.querySelectorAll<HTMLTableElement>('table').forEach((el) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'table-scroll';
+      wrap.tabIndex = 0;
+      wrap.setAttribute('role', 'region');
+      wrap.setAttribute('aria-label', table);
+      el.replaceWith(wrap);
+      wrap.append(el);
+    });
+
+    // Headings link to themselves, so a section can be shared.
+    prose
+      .querySelectorAll<HTMLHeadingElement>('h2[id], h3[id]')
+      .forEach((h) => {
+        const link = document.createElement('a');
+        link.className = 'heading-anchor';
+        link.href = `#${h.id}`;
+        link.append(...h.childNodes);
+        h.append(link);
+      });
+  }
+
+  // "On this page": mark the section being read.
+  const toc = document.querySelector<HTMLDetailsElement>('.toc');
+  if (toc) {
+    if (matchMedia('(max-width: 1023px)').matches) toc.open = false;
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>('a')];
+    const targets = links
+      .map((link) =>
+        document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      )
+      .filter((el): el is HTMLElement => el !== null);
+    const mark = (id: string) =>
+      links.forEach((link) => {
+        if (decodeURIComponent(link.hash.slice(1)) === id)
+          link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        });
+        const first = targets.find((el) => visible.has(el.id));
+        if (first) mark(first.id);
+      },
+      { rootMargin: '-80px 0px -65% 0px' },
+    );
+    targets.forEach((el) => observer.observe(el));
+  }
+</script>

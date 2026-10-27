@@ -96,7 +96,7 @@ const pixels = heights.flatMap((height, c) =>
           <div class="dash-side">
             <div class="dash-brand">
               <span class="brand-mark">
-                <BrandLogo size={12} />
+                <BrandLogo size={22} />
               </span>
               infratrove
             </div>
@@ -201,8 +201,8 @@ const pixels = heights.flatMap((height, c) =>
         </a>
       </div>
       <div class="post-grid">
-        {posts.map((post, i) => (
-          <PostCard post={post} tone={i} />
+        {posts.map((post) => (
+          <PostCard post={post} />
         ))}
       </div>
     </section>

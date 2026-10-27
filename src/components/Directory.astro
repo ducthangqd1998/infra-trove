@@ -48,11 +48,15 @@ import Icon from './Icon.astro';
   </div>
 </section>
 <script>
+  import { searchTools, type SearchTool } from '../lib/tool-search';
   let active = 'All tools';
   const input = document.getElementById(
     'tool-search',
   ) as HTMLInputElement | null;
   const cards = [...document.querySelectorAll<HTMLElement>('[data-tool-card]')];
+  const searchIndex: SearchTool[] = cards.map((card) =>
+    JSON.parse(card.dataset.search!),
+  );
   function readFavorites(): string[] {
     try {
       const saved = JSON.parse(
@@ -106,10 +110,18 @@ import Icon from './Icon.astro';
   function filter() {
     const favorites = readFavorites();
     const query = input?.value.toLowerCase().trim() || '';
+    const matches = searchTools(searchIndex, query);
+    const slugs = new Set(matches.map((tool) => tool.slug));
+    if (query)
+      matches.forEach((tool) => {
+        const card = cards.find((card) => card.dataset.slug === tool.slug)!;
+        card.parentElement!.append(card);
+      });
+    else cards.forEach((card) => card.parentElement!.append(card));
     let count = 0;
     cards.forEach((card) => {
       const visible =
-        (card.dataset.search || '').includes(query) &&
+        slugs.has(card.dataset.slug || '') &&
         (active === 'All tools' ||
           (active === 'Favorites'
             ? favorites.includes(card.dataset.slug || '')

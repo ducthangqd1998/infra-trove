@@ -181,7 +181,9 @@ test('keyboard search and HTML without JavaScript', async ({
 }) => {
   await page.goto('/tools/');
   await page.keyboard.press('Control+k');
-  await expect(page.getByRole('searchbox')).toBeFocused();
+  await expect(
+    page.getByRole('combobox', { name: 'Search tools' }),
+  ).toBeFocused();
   const context = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await context.newPage();
   await staticPage.goto(new URL('/tools/json-formatter/', page.url()).href);
@@ -219,8 +221,11 @@ test('guide index lists each language and filters by category', async ({
   await expect(page.locator('[data-post]')).toHaveCount(7);
   await page.getByRole('button', { name: 'Text & data' }).click();
   await expect(page.locator('[data-post]:visible')).toHaveCount(3);
+  await expect(page.getByRole('status')).toHaveText('Showing 3 of 7 articles');
+  await expect(page).toHaveURL(/\?category=Text/);
   await page.getByRole('button', { name: 'All', exact: true }).click();
   await expect(page.locator('[data-post]:visible')).toHaveCount(7);
+  await expect(page).not.toHaveURL(/category=/);
   await page
     .getByRole('navigation', { name: 'Guide language' })
     .getByRole('link', { name: 'Tiếng Việt' })
@@ -231,16 +236,52 @@ test('guide index lists each language and filters by category', async ({
   );
   await expect(page.locator('[data-post]')).toHaveCount(7);
 });
+test('guide index opens on the category from the URL', async ({ page }) => {
+  await page.goto('/blog/?category=Generators');
+  await expect(page.locator('[data-post]:visible')).toHaveCount(1);
+  await expect(
+    page.getByRole('button', { name: 'Generators' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+});
 test('guide contents link jumps to its heading and the tool CTA works', async ({
   page,
 }) => {
   await page.goto('/blog/unix-cron-basics/');
-  await page
+  const contents = page.getByRole('complementary', { name: 'On this page' });
+  // Collapsed on narrow screens, open beside the article on wide ones.
+  if (await contents.locator('details:not([open])').count())
+    await contents.getByText('On this page').click();
+  await contents
     .getByRole('link', { name: 'Timezones and daylight saving matter' })
     .click();
   await expect(page).toHaveURL(/#timezones-and-daylight-saving-matter$/);
+  await expect(
+    contents.getByRole('link', {
+      name: 'Timezones and daylight saving matter',
+    }),
+  ).toHaveAttribute('aria-current', 'location');
   await page.getByRole('link', { name: /Open tool: Cron Generator/ }).click();
   await expect(page).toHaveURL(/\/tools\/cron-generator\/$/);
+});
+test('guide code blocks copy, tables scroll and related guides follow', async ({
+  page,
+  context,
+  browserName,
+}) => {
+  if (browserName === 'chromium')
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/blog/yaml-json-conversion/');
+  const copy = page.getByRole('button', { name: 'Copy code' }).first();
+  await copy.click();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Copied' }),
+  ).toHaveCount(1);
+  await page.goto('/blog/storage-units-gb-gib/');
+  await expect(
+    page.getByRole('region', { name: 'Scrollable table' }),
+  ).toBeVisible();
+  const related = page.getByRole('region', { name: 'Keep reading' });
+  await expect(related.locator('[data-post]')).toHaveCount(2);
 });
 test('tool pages mark the current tool in the sidebar', async ({
   page,
