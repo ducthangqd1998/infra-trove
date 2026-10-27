@@ -97,12 +97,6 @@ export default function UuidGenerator() {
           </li>
         ))}
       </ol>
-      <div className="workspace-actions">
-        <span className="tool-hint">
-          {shown.length} {shown.length === 1 ? 'identifier' : 'identifiers'}
-        </span>
-        <CopyButton value={shown.join('\n')} label="Copy all" />
-      </div>
     </ToolReady>
   );
 }

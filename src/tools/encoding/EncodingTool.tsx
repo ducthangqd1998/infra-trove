@@ -126,7 +126,7 @@ export default function EncodingTool({ kind }: { kind: 'base64' | 'url' }) {
       </div>
       <p
         id="encoding-error"
-        className={result.error ? 'inline-error' : 'tool-hint'}
+        className={result.error ? 'inline-error' : 'sr-only'}
         role="status"
       >
         {result.error ||

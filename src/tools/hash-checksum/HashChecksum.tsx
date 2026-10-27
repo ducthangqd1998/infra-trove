@@ -72,8 +72,8 @@ export default function HashChecksum() {
 
   const comparison = compareChecksum(digest, expected, algorithm);
   const verdict = {
-    empty: 'Paste an expected checksum to compare.',
-    pending: 'Calculate a checksum to compare.',
+    empty: '',
+    pending: '',
     invalid: `Expected checksum must contain ${algorithm === 'SHA-256' ? 64 : 128} hexadecimal characters.`,
     match: 'Checksums match',
     mismatch: 'Checksums do not match',
@@ -122,8 +122,8 @@ export default function HashChecksum() {
         </label>
       )}
       <p className="tool-hint" id="hash-note">
-        UTF-8 text, including whitespace, is hashed exactly as entered. File
-        limit: 32 MiB. Files stay in this tab.
+        Text is hashed exactly as entered, whitespace included. Files up to 32
+        MiB stay in this tab.
       </p>
     </div>
   );
@@ -200,15 +200,11 @@ export default function HashChecksum() {
         <p
           id="hash-verdict"
           role="status"
-          className={comparison === 'invalid' ? 'inline-error' : 'tool-hint'}
+          className={comparison === 'invalid' ? 'inline-error' : 'sr-only'}
         >
           {verdict}
         </p>
       )}
-      <p className="tool-hint">
-        A match confirms agreement with the supplied checksum. It does not prove
-        a file is safe or authenticate its publisher.
-      </p>
     </>
   );
 
@@ -249,10 +245,9 @@ export default function HashChecksum() {
           </button>
         </div>
       </div>
-
       <p
         id="hash-status"
-        className={error ? 'inline-error' : 'tool-hint'}
+        className={error ? 'inline-error' : busy ? 'tool-hint' : 'sr-only'}
         role="status"
       >
         {error ||
@@ -260,9 +255,8 @@ export default function HashChecksum() {
             ? 'Calculating locally…'
             : digest
               ? `${algorithm} checksum calculated.`
-              : 'Choose a source and calculate its checksum.')}
+              : '')}
       </p>
-
       {/* If hash is computed: OUTPUT FIRST on top */}
       {digest && checksumOutputBlock}
 

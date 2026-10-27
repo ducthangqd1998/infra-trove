@@ -75,9 +75,9 @@ export default function JwtDecoder() {
           </button>
         </div>
       )}
-      <p className="tool-hint" id="jwt-note">
-        Inspect claims locally. Decoding does not establish trust, authenticate
-        a user or check a signature.
+      <p className="sr-only" id="jwt-note">
+        Decoding does not establish trust, authenticate a user or check a
+        signature.
       </p>
     </div>
   );
@@ -85,7 +85,7 @@ export default function JwtDecoder() {
   return (
     <ToolReady>
       <div className="tool-bar">
-        <strong className="tool-hint">Signature not verified</strong>
+        <span className="tool-tag">Signature not verified</span>
         <div className="tool-bar-end">
           <button
             className="text-button"
@@ -107,7 +107,6 @@ export default function JwtDecoder() {
           </button>
         </div>
       </div>
-
       {/* If token is empty or invalid, show the token input at the top */}
       {!result.value && tokenInputBlock}
 
@@ -194,13 +193,13 @@ export default function JwtDecoder() {
 
       <p
         id="jwt-status"
-        className={result.error ? 'inline-error' : 'tool-hint'}
+        className={result.error ? 'inline-error' : 'sr-only'}
         role="status"
       >
         {result.error ||
           (result.value
             ? 'Header and payload decoded. Signature not checked.'
-            : 'Paste a token or load the example to inspect its claims.')}
+            : '')}
       </p>
 
       {/* Detailed UTC time claims */}

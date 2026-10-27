@@ -42,8 +42,11 @@ test('converter and token input stays out of requests, storage and URLs', async 
     const control = page.getByLabel(field, { exact: true });
     await expect(control).toBeEnabled();
     const requests: string[] = [];
-    const listener = (request: { url(): string }) =>
-      requests.push(request.url());
+    // Fonts load lazily the first time a glyph needs them; they are static assets, not tool data.
+    const listener = (request: { url(): string }) => {
+      if (!/\.woff2?$/.test(new URL(request.url()).pathname))
+        requests.push(request.url());
+    };
     page.on('request', listener);
     await control.fill(input);
     if (slug === 'yaml-json-converter') {

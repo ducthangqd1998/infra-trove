@@ -77,19 +77,12 @@ export default function StorageConverter() {
           }))}
         />
       </div>
-      <p className="tool-hint">
-        SI standard: 1 GB = 1000 MB (10⁹ bytes). IEC standard: 1 GiB = 1024 MiB
-        (2³⁰ bytes).
-      </p>
       <p
         id="storage-status"
-        className={result.error ? 'inline-error' : 'tool-hint'}
+        className={result.error ? 'inline-error' : 'sr-only'}
         role="status"
       >
-        {result.error ||
-          (result.rows.length
-            ? 'Conversions updated.'
-            : 'Enter an amount to see every unit.')}
+        {result.error || (result.rows.length ? 'Conversions updated.' : '')}
       </p>
       {result.rows.length > 0 ? (
         <dl className="storage-results">
@@ -157,11 +150,11 @@ export default function StorageConverter() {
           </p>
         </div>
       ) : null}
-      <p className="tool-hint" id="storage-rounding">
-        Results are rounded to 9 decimal places, half up. Values below the
-        displayed precision are marked with &lt;. Whole integers keep their
-        precision. No exponent notation.
-      </p>
+      {result.rows.length > 0 && (
+        <p className="tool-hint" id="storage-rounding">
+          Rounded half up to 9 decimal places. Smaller values show as &lt;.
+        </p>
+      )}
     </ToolReady>
   );
 }

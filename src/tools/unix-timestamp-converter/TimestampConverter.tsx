@@ -135,9 +135,7 @@ export default function TimestampConverter() {
               />
             ) : toDate.error ? (
               <p className="inline-error">{toDate.error}</p>
-            ) : (
-              <p className="result-empty">Results appear as you type.</p>
-            )}
+            ) : null}
           </div>
         </section>
         <section aria-labelledby="date-to-ts">
@@ -172,9 +170,7 @@ export default function TimestampConverter() {
               />
             ) : toTimestamp.error ? (
               <p className="inline-error">{toTimestamp.error}</p>
-            ) : (
-              <p className="result-empty">Results appear as you type.</p>
-            )}
+            ) : null}
           </div>
         </section>
       </div>

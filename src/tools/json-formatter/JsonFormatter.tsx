@@ -250,8 +250,7 @@ export default function JsonFormatter() {
       </div>
 
       <p className="tool-hint">
-        Multi-language formatter · JSON, XML, YAML, SQL &amp; HTML · Maximum
-        200,000 characters · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> formats
+        <kbd>Ctrl</kbd> + <kbd>Enter</kbd> formats · up to 200,000 characters
       </p>
     </ToolReady>
   );

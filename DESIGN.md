@@ -385,6 +385,11 @@ so iOS does not zoom.
   to a 22rem rail (`--rail-w`) on the right, and the related tools sit under the card on the left,
   so both columns end together and no side of the page stays empty. Below 1600px the panels stay
   below the card, as on every tool under 1024px.
+  Guide panels carry no eyebrow badge and show an Example only when the tool has no "Load example"
+  button or preset that already shows it. Related tools are a row of compact link tiles (icon,
+  name, two-line summary), not full tool cards. A fact appears once: hints that repeat the guide
+  panel, the status line or the footer privacy note are dropped, and idle status text is
+  screen-reader-only.
 - **Guide header:** title, lead and byline on the left; on the right a framed flat illustration
   (`PostArt.astro`, one scene per guide) drawn only from tokens: `soft` stage with faint accent arcs,
   `ink` outlines, `surface` and `code` fills, heat scale for emphasis. Decorative (`aria-hidden`), no
