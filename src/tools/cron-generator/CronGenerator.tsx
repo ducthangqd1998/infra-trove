@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { fieldAt, previewCron } from './logic';
 import {
   CopyButton,
+  CopyIconButton,
   Segmented,
   ToolReady,
   message,
@@ -49,23 +50,29 @@ export default function CronGenerator() {
               ? 'Not a valid five-field expression yet'
               : ' '}
         </p>
-        <label className="cron-input">
-          <span className="seg-label">Cron expression</span>
-          <input
-            spellCheck={false}
-            maxLength={100}
-            value={expression}
-            aria-describedby="cron-error"
-            aria-invalid={!!preview.error}
-            onChange={(event) => {
-              setExpression(event.target.value);
-              trackCaret(event.target);
-            }}
-            onSelect={(event) => trackCaret(event.currentTarget)}
-            onFocus={(event) => trackCaret(event.currentTarget)}
-            onBlur={() => setField(null)}
-          />
-        </label>
+        <div className="cron-input">
+          <label htmlFor="cron-expression-input" className="seg-label">
+            Cron expression
+          </label>
+          <div className="cron-input-box">
+            <input
+              id="cron-expression-input"
+              spellCheck={false}
+              maxLength={100}
+              value={expression}
+              aria-describedby="cron-error"
+              aria-invalid={!!preview.error}
+              onChange={(event) => {
+                setExpression(event.target.value);
+                trackCaret(event.target);
+              }}
+              onSelect={(event) => trackCaret(event.currentTarget)}
+              onFocus={(event) => trackCaret(event.currentTarget)}
+              onBlur={() => setField(null)}
+            />
+            <CopyIconButton value={expression.trim()} label="Cron expression" />
+          </div>
+        </div>
         <dl className="cron-fields">
           {fieldNames.map((name, index) => (
             <div key={name} className={field === index ? 'is-active' : ''}>

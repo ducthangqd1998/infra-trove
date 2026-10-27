@@ -35,7 +35,16 @@ export const tools: Tool[] = [
     summary: 'Turn compact JSON into something you can actually read.',
     category: 'Text & data',
     symbol: '{ }',
-    tags: ['beautify', 'minify', 'validate', 'API'],
+    tags: [
+      'beautify',
+      'minify',
+      'validate',
+      'API',
+      'XML',
+      'YAML',
+      'SQL',
+      'HTML',
+    ],
     steps: [
       'Paste a JSON value into the input.',
       'Choose an indentation size, then format or minify.',
@@ -61,7 +70,7 @@ export const tools: Tool[] = [
       'Compare to see added and removed lines. Switch between unified and side-by-side views.',
     ],
     example: 'Original: Hello world\nChanged: Hello InfraTrove',
-    note: 'CRLF and LF line endings are normalized. Ignoring whitespace collapses spaces and tabs within each line; blank lines remain significant. Comparison is capped at 20,000 characters per pane and a one-second diff budget.',
+    note: 'CRLF and LF line endings are normalized. Ignoring whitespace collapses spaces and tabs within each line; blank lines remain significant. Comparison is capped at 200,000 characters per pane and a 2.5-second diff budget.',
     related: ['json-formatter', 'base64-encoder-decoder'],
   },
   {

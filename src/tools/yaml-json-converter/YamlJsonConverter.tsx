@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { convertYamlJson, type Direction } from './logic';
 import {
   CopyButton,
+  DownloadIcon,
   Editor,
   ErrorMessage,
   Segmented,
@@ -115,7 +116,19 @@ export default function YamlJsonConverter() {
           lineNumbers
           wrap={false}
           placeholder="Converted output appears here"
-          actions={<CopyButton value={output} className="text-button small" />}
+          actions={
+            <>
+              <CopyButton value={output} className="text-button small" />
+              <button
+                type="button"
+                className="text-button small"
+                disabled={!output}
+                onClick={download}
+              >
+                <DownloadIcon /> Download output
+              </button>
+            </>
+          }
         />
       </div>
       <ErrorMessage message={error} />
@@ -124,9 +137,6 @@ export default function YamlJsonConverter() {
           YAML 1.2 · 100,000 characters · No aliases or custom tags. Comments
           are not preserved.
         </p>
-        <button className="text-button" disabled={!output} onClick={download}>
-          Download output
-        </button>
       </div>
     </ToolReady>
   );

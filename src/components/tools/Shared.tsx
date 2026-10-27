@@ -43,6 +43,14 @@ export const SwapIcon = () => (
 export const RefreshIcon = () => (
   <Svg d="M20 11a8 8 0 0 0-14.9-3.9L4 9M4 4v5h5M4 13a8 8 0 0 0 14.9 3.9L20 15M20 20v-5h-5" />
 );
+export const DownloadIcon = () => (
+  <Svg d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+);
+export const ChevronRightIcon = () => <Svg d="m9 18 6-6-6-6" />;
+export const ChevronDownIcon = () => <Svg d="m6 9 6 6 6-6" />;
+export const InfoIcon = () => (
+  <Svg d="M12 16v-4m0-4h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z" />
+);
 async function writeClipboard(value: string) {
   try {
     await navigator.clipboard.writeText(value);
@@ -50,6 +58,42 @@ async function writeClipboard(value: string) {
   } catch {
     return false;
   }
+}
+export function DownloadButton({
+  value,
+  filename,
+  mimeType = 'text/plain',
+  label = 'Download',
+  className = 'button secondary',
+}: {
+  value: string;
+  filename: string;
+  mimeType?: string;
+  label?: string;
+  className?: string;
+}) {
+  const download = () => {
+    if (!value) return;
+    const blob = new Blob([value], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  return (
+    <button
+      className={className}
+      type="button"
+      disabled={!value}
+      onClick={download}
+      title={label}
+    >
+      <DownloadIcon />
+      {label}
+    </button>
+  );
 }
 export function CopyButton({
   value,
@@ -175,6 +219,7 @@ export function Editor({
   errorLine,
   actions,
   meta,
+  compact = false,
   tall = false,
   describedBy,
   onKeyDown,
@@ -190,6 +235,7 @@ export function Editor({
   errorLine?: number;
   actions?: ReactNode;
   meta?: string;
+  compact?: boolean;
   tall?: boolean;
   describedBy?: string;
   onKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
@@ -197,7 +243,7 @@ export function Editor({
 }) {
   const id = useId();
   const gutter = useRef<HTMLDivElement>(null);
-  const lines = Math.min(value ? value.split('\n').length : 1, 20_000);
+  const lines = Math.min(value ? value.split('\n').length : 1, 100_000);
   return (
     <div className="editor-field">
       <div className="editor-head">
@@ -208,7 +254,7 @@ export function Editor({
         {actions && <div className="editor-actions">{actions}</div>}
       </div>
       <div
-        className={`editor-frame${tall ? ' tall' : ''}${readOnly ? ' readonly' : ''}`}
+        className={`editor-frame${compact ? ' compact' : tall ? ' tall' : ''}${readOnly ? ' readonly' : ''}`}
       >
         {lineNumbers && (
           <div className="editor-gutter" ref={gutter} aria-hidden="true">

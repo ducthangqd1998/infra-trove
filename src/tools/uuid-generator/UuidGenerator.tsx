@@ -3,6 +3,7 @@ import { generateUuids } from './logic';
 import {
   CopyButton,
   CopyIconButton,
+  DownloadButton,
   ErrorMessage,
   RefreshIcon,
   ToolReady,
@@ -67,6 +68,24 @@ export default function UuidGenerator() {
         </div>
       </div>
       <ErrorMessage message={error} />
+      <div className="uuid-list-header">
+        <span className="tool-hint">
+          {shown.length} {shown.length === 1 ? 'identifier' : 'identifiers'}
+        </span>
+        <div className="uuid-list-actions">
+          <CopyButton
+            value={shown.join('\n')}
+            label="Copy all"
+            className="text-button small"
+          />
+          <DownloadButton
+            value={shown.join('\n')}
+            filename="uuids.txt"
+            label="Download"
+            className="text-button small"
+          />
+        </div>
+      </div>
       <ol className="uuid-list" aria-label="Generated identifiers" role="list">
         {shown.map((uuid, index) => (
           <li key={uuids[index]}>

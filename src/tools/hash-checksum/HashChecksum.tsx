@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   CopyButton,
+  DownloadButton,
   Editor,
   Segmented,
   ToolReady,
@@ -164,11 +165,19 @@ export default function HashChecksum() {
           value={digest}
           readOnly
           actions={
-            <CopyButton
-              value={digest}
-              label="Copy checksum"
-              className="text-button small"
-            />
+            <>
+              <CopyButton
+                value={digest}
+                label="Copy checksum"
+                className="text-button small"
+              />
+              <DownloadButton
+                value={digest}
+                filename={`${algorithm.toLowerCase()}.txt`}
+                label="Download"
+                className="text-button small"
+              />
+            </>
           }
         />
       </div>
@@ -187,9 +196,11 @@ export default function HashChecksum() {
         id="hash-verdict"
         role="status"
         className={
-          comparison === 'invalid' || comparison === 'mismatch'
-            ? 'inline-error'
-            : 'tool-hint'
+          comparison === 'match'
+            ? 'inline-success'
+            : comparison === 'invalid' || comparison === 'mismatch'
+              ? 'inline-error'
+              : 'tool-hint'
         }
       >
         {verdict}

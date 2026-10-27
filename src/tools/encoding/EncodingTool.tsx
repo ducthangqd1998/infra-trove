@@ -3,6 +3,7 @@ import { transformBase64 } from './base64';
 import { transformUrl } from './url';
 import {
   CopyButton,
+  DownloadButton,
   Editor,
   Segmented,
   SwapIcon,
@@ -75,7 +76,7 @@ export default function EncodingTool({ kind }: { kind: 'base64' | 'url' }) {
           label={decode ? `${name} to decode` : 'Text to encode'}
           value={input}
           meta={textStats(input, true)}
-          tall
+          compact
           placeholder={
             decode ? 'Paste an encoded value…' : 'Type or paste text…'
           }
@@ -100,10 +101,26 @@ export default function EncodingTool({ kind }: { kind: 'base64' | 'url' }) {
           value={result.output}
           meta={result.output ? textStats(result.output, true) : undefined}
           readOnly
-          tall
+          compact
           placeholder="Your result appears here as you type"
           actions={
-            <CopyButton value={result.output} className="text-button small" />
+            <>
+              <CopyButton value={result.output} className="text-button small" />
+              <DownloadButton
+                value={result.output}
+                filename={
+                  kind === 'base64'
+                    ? decode
+                      ? 'decoded.txt'
+                      : 'encoded.b64'
+                    : decode
+                      ? 'decoded.txt'
+                      : 'encoded.txt'
+                }
+                label="Download"
+                className="text-button small"
+              />
+            </>
           }
         />
       </div>

@@ -6,8 +6,8 @@ export function compareText(
   ignoreCase = false,
   ignoreWhitespace = false,
 ) {
-  checkSize(original, 20_000);
-  checkSize(changed, 20_000);
+  checkSize(original, 200_000);
+  checkSize(changed, 200_000);
   const normalize = (value: string) => {
     let result = value.replace(/\r\n?/g, '\n');
     if (ignoreWhitespace)
@@ -18,8 +18,8 @@ export function compareText(
     return ignoreCase ? result.toLowerCase() : result;
   };
   const parts = diffLines(normalize(original), normalize(changed), {
-    timeout: 1000,
-    maxEditLength: 4000,
+    timeout: 2500,
+    maxEditLength: 30_000,
   });
   if (!parts) throw new Error('Comparison is too complex. Try smaller inputs.');
   return parts;

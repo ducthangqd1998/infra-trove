@@ -81,9 +81,8 @@ export default function PasswordGenerator() {
             <button
               type="button"
               className="icon-button"
-              aria-label="Regenerate password"
-              title="Regenerate"
-              disabled={!output}
+              aria-label={output ? 'Regenerate password' : 'Generate'}
+              title={output ? 'Regenerate' : 'Generate password'}
               onClick={generate}
             >
               <RefreshIcon />
@@ -103,8 +102,8 @@ export default function PasswordGenerator() {
             <i />
           </span>
           <span>
-            <strong>{strength.label}</strong> · {strength.bits} bits of entropy
-            with these settings
+            <strong>{strength.label}</strong> · Estimated {strength.bits} bits
+            of entropy (based on settings)
           </span>
         </div>
       </div>

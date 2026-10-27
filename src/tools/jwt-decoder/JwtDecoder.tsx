@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { decodeJwt, JWT_EXAMPLE } from './logic';
 import {
   CopyButton,
+  DownloadButton,
   Editor,
   ToolReady,
   message,
@@ -69,11 +70,20 @@ export default function JwtDecoder() {
           readOnly
           lineNumbers
           actions={
-            <CopyButton
-              value={payload}
-              label="Copy payload"
-              className="text-button small"
-            />
+            <>
+              <CopyButton
+                value={payload}
+                label="Copy payload"
+                className="text-button small"
+              />
+              <DownloadButton
+                value={payload}
+                filename="jwt-payload.json"
+                mimeType="application/json"
+                label="Download"
+                className="text-button small"
+              />
+            </>
           }
         />
       </div>
@@ -89,7 +99,18 @@ export default function JwtDecoder() {
       </p>
       {result.value && (
         <section className="jwt-dates" aria-labelledby="jwt-dates-title">
-          <h2 id="jwt-dates-title">Time claims in UTC</h2>
+          <div className="jwt-dates-head">
+            <h2 id="jwt-dates-title">Time claims in UTC</h2>
+            {typeof result.value.payload.exp === 'number' && (
+              <span
+                className={`validity ${result.value.payload.exp * 1000 < Date.now() ? 'bad' : 'ok'}`}
+              >
+                {result.value.payload.exp * 1000 < Date.now()
+                  ? 'Expired (per browser clock)'
+                  : 'Active (not expired yet)'}
+              </span>
+            )}
+          </div>
           {result.value.dates.length ? (
             <dl className="result-rows">
               {result.value.dates.map(({ claim, iso }) => (

@@ -143,8 +143,18 @@ describe('diff', () => {
         (part) => !part.added && !part.removed,
       ),
     ).toBe(true));
+  it('handles large text inputs up to 200,000 characters', () => {
+    const textA = 'const variable_name = "some_sample_value_here";\n'.repeat(
+      1500,
+    );
+    const textB = 'const variable_name = "some_modified_value_here";\n'.repeat(
+      1500,
+    );
+    const parts = compareText(textA, textB);
+    expect(parts.length).toBeGreaterThan(0);
+  });
   it('rejects oversized text', () =>
-    expect(() => compareText('a'.repeat(20_001), '')).toThrow('limit'));
+    expect(() => compareText('a'.repeat(200_001), '')).toThrow('limit'));
 });
 describe('timestamps', () => {
   it('supports zero, milliseconds and negative epochs', () => {

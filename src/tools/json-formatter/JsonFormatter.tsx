@@ -1,8 +1,8 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { formatJson } from './logic';
 import {
   CheckIcon,
   CopyButton,
+  DownloadButton,
   Editor,
   ErrorMessage,
   Segmented,
@@ -11,7 +11,15 @@ import {
   runOnModEnter,
   textStats,
 } from '../../components/tools/Shared';
-/** Line of a JSON.parse error, from "line N" or a character position. */
+import CodeViewer from './CodeViewer';
+import {
+  EXAMPLES,
+  LANGUAGE_LABELS,
+  type SupportedLanguage,
+  formatCode,
+} from './formatters';
+import JsonTreeView from './JsonTreeView';
+
 function errorLine(text: string, error: string) {
   const line = /line (\d+)/i.exec(error);
   if (line) return Number(line[1]);
@@ -20,46 +28,128 @@ function errorLine(text: string, error: string) {
     ? text.slice(0, Number(position[1])).split('\n').length
     : undefined;
 }
+
 export default function JsonFormatter() {
+  const [language, setLanguage] = useState<SupportedLanguage>('json');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [indent, setIndent] = useState('2');
+  const [indent, setIndent] = useState<'2' | '4'>('2');
+  const [outputMode, setOutputMode] = useState<'code' | 'tree'>('code');
+
   const deferred = useDeferredValue(input);
-  // Live validity while typing; formatting itself stays an explicit action.
+
+  // Live validity check based on active language
   const check = useMemo(() => {
     if (!deferred.trim()) return null;
-    try {
-      JSON.parse(deferred);
-      return { ok: true as const };
-    } catch (error) {
-      const text = message(error);
-      return { ok: false as const, text, line: errorLine(deferred, text) };
+    if (language === 'json') {
+      try {
+        JSON.parse(deferred);
+        return { ok: true as const, text: 'Valid JSON' };
+      } catch (err) {
+        const text = message(err);
+        return { ok: false as const, text, line: errorLine(deferred, text) };
+      }
     }
-  }, [deferred]);
+    if (language === 'xml') {
+      // Basic balanced tag check
+      const hasUnclosed = /<([a-zA-Z0-9:-]+)[^>]*>(?!.*?<\/\1>)/s.test(
+        deferred,
+      );
+      return hasUnclosed
+        ? { ok: false as const, text: 'Unclosed XML tag' }
+        : { ok: true as const, text: 'XML ready' };
+    }
+    return { ok: true as const, text: `${LANGUAGE_LABELS[language]} ready` };
+  }, [deferred, language]);
+
   function run(minify = false) {
     try {
-      setOutput(formatJson(input, minify ? 'minify' : Number(indent)));
+      setOutput(formatCode(input, language, minify ? 'minify' : indent));
       setError('');
-    } catch (error) {
-      setError(message(error));
+    } catch (err) {
+      setError(message(err));
       setOutput('');
     }
   }
+
+  function handleLanguageChange(nextLang: SupportedLanguage) {
+    setLanguage(nextLang);
+    setError('');
+    setOutput('');
+    // If input is empty or matches an existing example, switch to the new example
+    const isCurrentExample = Object.values(EXAMPLES).includes(input);
+    if (!input.trim() || isCurrentExample) {
+      setInput(EXAMPLES[nextLang]);
+    }
+    if (outputMode === 'tree' && nextLang !== 'json') {
+      setOutputMode('code');
+    }
+  }
+
   function reset(value: string) {
     setInput(value);
     setOutput('');
     setError('');
   }
+
+  const inputLabel = `${LANGUAGE_LABELS[language]} input`;
+  const outputLabel = `${LANGUAGE_LABELS[language]} output`;
+  const formatButtonText = `Format ${LANGUAGE_LABELS[language]}`;
+
+  const outputActions = (
+    <>
+      {language === 'json' && (
+        <Segmented
+          label="View"
+          value={outputMode}
+          options={[
+            { value: 'code', label: 'Code' },
+            { value: 'tree', label: 'Tree' },
+          ]}
+          onChange={(val) => setOutputMode(val as 'code' | 'tree')}
+        />
+      )}
+      <CopyButton value={output} className="text-button small" />
+      <DownloadButton
+        value={output}
+        filename={`formatted.${language}`}
+        mimeType={
+          language === 'json'
+            ? 'application/json'
+            : language === 'xml'
+              ? 'application/xml'
+              : 'text/plain'
+        }
+        label="Download"
+        className="text-button small"
+      />
+    </>
+  );
+
   return (
     <ToolReady>
-      <div className="tool-bar">
+      {/* Top language format selector */}
+      <div className="tool-bar language-bar">
+        <Segmented
+          label="Format"
+          value={language}
+          options={[
+            { value: 'json', label: 'JSON' },
+            { value: 'xml', label: 'XML' },
+            { value: 'yaml', label: 'YAML' },
+            { value: 'sql', label: 'SQL' },
+            { value: 'html', label: 'HTML' },
+          ]}
+          onChange={(val) => handleLanguageChange(val as SupportedLanguage)}
+        />
+        <div className="tool-bar-sep" aria-hidden="true" />
         <button
           className="button"
           onClick={() => run()}
           aria-keyshortcuts="Control+Enter Meta+Enter"
         >
-          Format JSON
+          {formatButtonText}
         </button>
         <button className="text-button" onClick={() => run(true)}>
           Minify
@@ -71,19 +161,15 @@ export default function JsonFormatter() {
             { value: '2', label: '2 spaces' },
             { value: '4', label: '4 spaces' },
           ]}
-          onChange={(value) => {
-            setIndent(value);
+          onChange={(val) => {
+            setIndent(val as '2' | '4');
             if (output) setOutput('');
           }}
         />
         <div className="tool-bar-end">
           <button
             className="text-button"
-            onClick={() =>
-              reset(
-                '{"project":"InfraTrove","tools":["JSON","Diff"],"free":true}',
-              )
-            }
+            onClick={() => reset(EXAMPLES[language])}
           >
             Load example
           </button>
@@ -92,10 +178,12 @@ export default function JsonFormatter() {
           </button>
         </div>
       </div>
+
       <ErrorMessage message={error} />
+
       <div className="editor-grid">
         <Editor
-          label="JSON input"
+          label={inputLabel}
           value={input}
           meta={textStats(input)}
           tall
@@ -103,7 +191,17 @@ export default function JsonFormatter() {
           wrap={false}
           errorLine={check && !check.ok ? check.line : undefined}
           describedBy="tool-error"
-          placeholder='{"hello": "world"}'
+          placeholder={
+            language === 'json'
+              ? '{"hello": "world"}'
+              : language === 'xml'
+                ? '<root><item>Hello</item></root>'
+                : language === 'yaml'
+                  ? 'key: value'
+                  : language === 'sql'
+                    ? 'SELECT * FROM users;'
+                    : '<p>Hello world</p>'
+          }
           onKeyDown={runOnModEnter(() => run())}
           onChange={(value) => {
             setInput(value);
@@ -118,7 +216,7 @@ export default function JsonFormatter() {
               >
                 {check.ok ? (
                   <>
-                    <CheckIcon /> Valid JSON
+                    <CheckIcon /> {check.text}
                   </>
                 ) : (
                   `Invalid${check.line ? ` · line ${check.line}` : ''}`
@@ -127,21 +225,33 @@ export default function JsonFormatter() {
             )
           }
         />
-        <Editor
-          label="JSON output"
-          value={output}
-          meta={output ? textStats(output) : undefined}
-          readOnly
-          tall
-          lineNumbers
-          wrap={false}
-          placeholder="Output appears here"
-          actions={<CopyButton value={output} className="text-button small" />}
-        />
+
+        {outputMode === 'tree' && language === 'json' ? (
+          <div className="editor-field">
+            <div className="editor-head">
+              <span className="editor-label">JSON tree</span>
+              <div className="editor-actions">{outputActions}</div>
+            </div>
+            <div className="editor-frame tall readonly">
+              <JsonTreeView json={output || input} />
+            </div>
+          </div>
+        ) : (
+          <CodeViewer
+            label={outputLabel}
+            value={output}
+            language={language}
+            meta={output ? textStats(output) : undefined}
+            tall
+            actions={outputActions}
+            placeholder="Output appears here"
+          />
+        )}
       </div>
+
       <p className="tool-hint">
-        Strict JSON · Maximum 200,000 characters · <kbd>Ctrl</kbd> +{' '}
-        <kbd>Enter</kbd> formats
+        Multi-language formatter · JSON, XML, YAML, SQL &amp; HTML · Maximum
+        200,000 characters · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> formats
       </p>
     </ToolReady>
   );
