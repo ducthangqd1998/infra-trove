@@ -1,9 +1,16 @@
 ---
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
+import '@fontsource/be-vietnam-pro/400.css';
+import '@fontsource/be-vietnam-pro/500.css';
+import '@fontsource/be-vietnam-pro/600.css';
+import '@fontsource/be-vietnam-pro/400-italic.css';
+import '@fontsource/be-vietnam-pro/500-italic.css';
+import '@fontsource/be-vietnam-pro/600-italic.css';
 import '../styles/global.css';
 import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
-import geistVietnamese from '@fontsource-variable/geist/files/geist-vietnamese-wght-normal.woff2?url';
+import beVietnamLatin from '@fontsource/be-vietnam-pro/files/be-vietnam-pro-latin-400-normal.woff2?url';
+import beVietnamVietnamese from '@fontsource/be-vietnam-pro/files/be-vietnam-pro-vietnamese-400-normal.woff2?url';
 import Icon from '../components/Icon.astro';
 import BrandLogo from '../components/BrandLogo.astro';
 import ToolSearch from '../components/ToolSearch.astro';
@@ -43,9 +50,10 @@ const indexable = isIndexableEnv && !noindex;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const path = Astro.url.pathname;
 const inBlog = path.startsWith('/blog') || path.startsWith('/vi/blog');
-// Preload the text font so the first paint does not swap fonts (layout shift).
-const fonts = path.startsWith('/vi/')
-  ? [geistLatin, geistVietnamese]
+// Geist serves the site chrome; Vietnamese blog content uses its own text font.
+// Other weights and italics load on demand through the scoped font-family.
+const fonts = path.startsWith('/vi/blog/')
+  ? [geistLatin, beVietnamLatin, beVietnamVietnamese]
   : [geistLatin];
 const footerTools = tools.slice(0, 5);
 const shareImage = image

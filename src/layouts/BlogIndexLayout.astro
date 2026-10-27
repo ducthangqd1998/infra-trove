@@ -17,7 +17,7 @@ const categories = [...new Set(posts.map((post) => post.data.category))];
   description={t.indexDescription}
   alternates={langs.map((item) => ({ lang: item, path: blogHref(item) }))}
 >
-  <div class="container page-section" lang={lang}>
+  <div class="container page-section blog-content" lang={lang}>
     <header class="blog-head banner">
       <div class="eyebrow">{t.badge}</div>
       <h1>{t.indexTitle}</h1>

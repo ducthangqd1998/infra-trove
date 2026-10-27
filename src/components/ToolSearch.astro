@@ -61,14 +61,18 @@ const index = tools.map(({ slug, title, summary, tags, category }) => ({
           data-search-slug={tool.slug}
         >
           <span class="quick-search-icon">
-            <ToolIcon slug={tool.slug} size={22} />
+            <ToolIcon slug={tool.slug} size={20} />
           </span>
           <span class="quick-search-copy">
-            <span class="quick-search-name">{tool.title}</span>
+            <span class="quick-search-name-row">
+              <span class="quick-search-name">{tool.title}</span>
+              <span class="quick-search-category">{tool.category}</span>
+            </span>
             <span class="quick-search-summary">{tool.summary}</span>
           </span>
           <span class="quick-search-open" aria-hidden="true">
-            <Icon name="arrow" size={16} />
+            <span class="quick-search-open-label">Open</span>
+            <Icon name="arrow" size={14} />
           </span>
         </li>
       ))}

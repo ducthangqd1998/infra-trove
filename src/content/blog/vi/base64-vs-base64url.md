@@ -84,21 +84,30 @@ Ai có chuỗi mã hóa cũng giải mã được. Đừng dùng Base64 để b�
 </blockquote>
 
 <div class="takeaways-box">
-  <div class="takeaways-title">3 điểm cốt lõi cần nhớ</div>
+  <div class="takeaways-header">
+    <h3 class="takeaways-title">3 điểm cốt lõi cần nhớ</h3>
+    <span class="takeaways-badge">Điểm cốt lõi</span>
+  </div>
   <div class="takeaways-grid">
     <div class="takeaway-item">
-      <span class="takeaway-num">01</span>
-      <strong class="takeaway-heading">An toàn cho URL</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">01</span>
+        <strong class="takeaway-heading">An toàn cho URL</strong>
+      </div>
       <p>Thay thế <code>+</code> và <code>/</code> bằng <code>-</code> và <code>_</code> để không bị phân tách nhầm trong URL query.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">02</span>
-      <strong class="takeaway-heading">Quy ước Padding</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">02</span>
+        <strong class="takeaway-heading">Quy ước Padding</strong>
+      </div>
       <p>Base64 chuẩn yêu cầu <code>=</code> cho đủ bội số của 4, trong khi Base64URL thường bỏ hẳn padding.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">03</span>
-      <strong class="takeaway-heading">Không phải bảo mật</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">03</span>
+        <strong class="takeaway-heading">Không phải bảo mật</strong>
+      </div>
       <p>Base64 chỉ là định dạng biểu diễn byte nhị phân, tuyệt đối không dùng thay thế cho mã hóa bảo mật hay hàm băm.</p>
     </div>
   </div>

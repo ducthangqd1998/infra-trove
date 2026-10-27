@@ -158,16 +158,18 @@ export function Segmented({
   value,
   options,
   onChange,
+  hideLabel = false,
 }: {
   label: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  hideLabel?: boolean;
 }) {
   const id = useId();
   return (
     <div className="seg-field">
-      <span className="seg-label" id={id}>
+      <span className={hideLabel ? 'sr-only' : 'seg-label'} id={id}>
         {label}
       </span>
       <div className="segmented" role="group" aria-labelledby={id}>

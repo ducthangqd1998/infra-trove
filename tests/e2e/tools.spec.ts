@@ -218,13 +218,13 @@ test('guide index lists each language and filters by category', async ({
   page,
 }) => {
   await page.goto('/blog/');
-  await expect(page.locator('[data-post]')).toHaveCount(7);
+  await expect(page.locator('[data-post]')).toHaveCount(8);
   await page.getByRole('button', { name: 'Text & data' }).click();
-  await expect(page.locator('[data-post]:visible')).toHaveCount(3);
-  await expect(page.getByRole('status')).toHaveText('Showing 3 of 7 articles');
+  await expect(page.locator('[data-post]:visible')).toHaveCount(4);
+  await expect(page.getByRole('status')).toHaveText('Showing 4 of 8 articles');
   await expect(page).toHaveURL(/\?category=Text/);
   await page.getByRole('button', { name: 'All', exact: true }).click();
-  await expect(page.locator('[data-post]:visible')).toHaveCount(7);
+  await expect(page.locator('[data-post]:visible')).toHaveCount(8);
   await expect(page).not.toHaveURL(/category=/);
   await page
     .getByRole('navigation', { name: 'Guide language' })
@@ -234,7 +234,7 @@ test('guide index lists each language and filters by category', async ({
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Hướng dẫn thực hành',
   );
-  await expect(page.locator('[data-post]')).toHaveCount(7);
+  await expect(page.locator('[data-post]')).toHaveCount(8);
 });
 test('guide index opens on the category from the URL', async ({ page }) => {
   await page.goto('/blog/?category=Generators');
@@ -294,6 +294,7 @@ test('every guide opens with its own illustration, in both languages', async ({
     'unix-cron-basics',
     'verify-file-checksum',
     'yaml-json-conversion',
+    'mermaid-diagram-as-code',
   ];
   for (const slug of slugs)
     for (const base of ['/blog/', '/vi/blog/']) {

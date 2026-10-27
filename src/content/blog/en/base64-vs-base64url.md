@@ -84,21 +84,30 @@ Anyone who has the encoded text can decode it. Do not use Base64 as password pro
 </blockquote>
 
 <div class="takeaways-box">
-  <div class="takeaways-title">3 core takeaways to remember</div>
+  <div class="takeaways-header">
+    <h3 class="takeaways-title">3 core takeaways to remember</h3>
+    <span class="takeaways-badge">Key Takeaways</span>
+  </div>
   <div class="takeaways-grid">
     <div class="takeaway-item">
-      <span class="takeaway-num">01</span>
-      <strong class="takeaway-heading">URL-safe characters</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">01</span>
+        <strong class="takeaway-heading">URL-safe characters</strong>
+      </div>
       <p>Replaces <code>+</code> and <code>/</code> with <code>-</code> and <code>_</code> so query strings never need percent-escaping.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">02</span>
-      <strong class="takeaway-heading">Padding convention</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">02</span>
+        <strong class="takeaway-heading">Padding convention</strong>
+      </div>
       <p>Standard Base64 pads to a multiple of 4 with <code>=</code>, whereas Base64URL typically omits padding entirely.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">03</span>
-      <strong class="takeaway-heading">Encoding is not privacy</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">03</span>
+        <strong class="takeaway-heading">Encoding is not privacy</strong>
+      </div>
       <p>Base64 is merely a byte representation format. Never treat it as encryption or password security.</p>
     </div>
   </div>

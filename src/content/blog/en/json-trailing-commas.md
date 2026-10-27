@@ -103,21 +103,30 @@ Arrays, strings, numbers, booleans and `null` can all be complete JSON documents
 InfraTrove parses JSON using JavaScript and serializes the result. Duplicate object keys keep the last value. Numbers beyond JavaScript's safe integer range can lose precision. If you need exact handling of large identifiers, encode them as strings in the source system or use a parser designed for lossless numbers.
 
 <div class="takeaways-box">
-  <div class="takeaways-title">3 golden rules to remember</div>
+  <div class="takeaways-header">
+    <h3 class="takeaways-title">3 golden rules to remember</h3>
+    <span class="takeaways-badge">Summary</span>
+  </div>
   <div class="takeaways-grid">
     <div class="takeaway-item">
-      <span class="takeaway-num">01</span>
-      <strong class="takeaway-heading">Strict double quotes</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">01</span>
+        <strong class="takeaway-heading">Strict double quotes</strong>
+      </div>
       <p>Both object keys and string values must strictly be enclosed in double quotes <code>"..."</code>.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">02</span>
-      <strong class="takeaway-heading">Zero trailing commas</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">02</span>
+        <strong class="takeaway-heading">Zero trailing commas</strong>
+      </div>
       <p>The final item in an object or array must never have a trailing comma after it.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">03</span>
-      <strong class="takeaway-heading">Proper escape sequences</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">03</span>
+        <strong class="takeaway-heading">Proper escape sequences</strong>
+      </div>
       <p>Raw newlines must be converted to <code>\n</code>, and literal quotes escaped with <code>\"</code>.</p>
     </div>
   </div>

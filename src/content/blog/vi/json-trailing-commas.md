@@ -103,21 +103,30 @@ Mảng, chuỗi, số, boolean và `null` đều có thể là một tài liệu
 InfraTrove phân tích JSON bằng JavaScript rồi serialize kết quả. Khóa trùng nhau sẽ giữ giá trị cuối cùng. Số vượt quá khoảng số nguyên an toàn của JavaScript có thể mất độ chính xác. Nếu cần xử lý chính xác các định danh lớn, hãy mã hóa chúng thành chuỗi ở hệ thống nguồn, hoặc dùng parser được thiết kế cho số không mất độ chính xác.
 
 <div class="takeaways-box">
-  <div class="takeaways-title">3 quy tắc vàng cần nhớ</div>
+  <div class="takeaways-header">
+    <h3 class="takeaways-title">3 quy tắc vàng cần nhớ</h3>
+    <span class="takeaways-badge">Quy tắc vàng</span>
+  </div>
   <div class="takeaways-grid">
     <div class="takeaway-item">
-      <span class="takeaway-num">01</span>
-      <strong class="takeaway-heading">Luôn dùng nháy kép</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">01</span>
+        <strong class="takeaway-heading">Luôn dùng nháy kép</strong>
+      </div>
       <p>Cả tên khóa (keys) lẫn giá trị chuỗi (string values) đều bắt buộc nằm trong <code>"..."</code>.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">02</span>
-      <strong class="takeaway-heading">Không dấu phẩy cuối</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">02</span>
+        <strong class="takeaway-heading">Không dấu phẩy cuối</strong>
+      </div>
       <p>Mục cuối cùng trong object hoặc array tuyệt đối không được có dấu phẩy đi kèm.</p>
     </div>
     <div class="takeaway-item">
-      <span class="takeaway-num">03</span>
-      <strong class="takeaway-heading">Escape đúng chuẩn</strong>
+      <div class="takeaway-head">
+        <span class="takeaway-num">03</span>
+        <strong class="takeaway-heading">Escape đúng chuẩn</strong>
+      </div>
       <p>Xuống dòng thực tế phải thay bằng <code>\n</code>, nháy kép nội tại phải escape bằng <code>\"</code>.</p>
     </div>
   </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  CheckIcon,
   CopyButton,
   DownloadButton,
   Editor,
@@ -26,18 +27,21 @@ export default function HashChecksum() {
   const [busy, setBusy] = useState(false);
   const generation = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+
   useEffect(
     () => () => {
       generation.current++;
     },
     [],
   );
+
   function invalidate() {
     generation.current++;
     setDigest('');
     setError('');
     setBusy(false);
   }
+
   async function calculate() {
     const run = ++generation.current;
     setDigest('');
@@ -57,6 +61,7 @@ export default function HashChecksum() {
       if (run === generation.current) setBusy(false);
     }
   }
+
   function clear() {
     invalidate();
     setInput('');
@@ -64,6 +69,7 @@ export default function HashChecksum() {
     setExpected('');
     if (fileInput.current) fileInput.current.value = '';
   }
+
   const comparison = compareChecksum(digest, expected, algorithm);
   const verdict = {
     empty: 'Paste an expected checksum to compare.',
@@ -72,6 +78,140 @@ export default function HashChecksum() {
     match: 'Checksums match',
     mismatch: 'Checksums do not match',
   }[comparison];
+
+  const sourceInputBlock = (
+    <div className={digest ? 'hash-source-section' : undefined}>
+      {digest && (
+        <div className="hash-source-header">
+          <span className="seg-label">Source input</span>
+        </div>
+      )}
+      {mode === 'text' ? (
+        <Editor
+          label="Text to hash"
+          value={input}
+          onChange={(value) => {
+            invalidate();
+            setInput(value);
+          }}
+          placeholder="Type text, or leave empty to hash an empty string"
+          describedBy="hash-status hash-note"
+          compact={!!digest}
+        />
+      ) : (
+        <label className="field hash-file">
+          Choose file
+          <input
+            ref={fileInput}
+            type="file"
+            aria-describedby="hash-note hash-status"
+            onChange={(event) => {
+              invalidate();
+              const selected = event.target.files?.[0] ?? null;
+              if (selected) {
+                try {
+                  validateFileSize(selected.size);
+                  setFile(selected);
+                } catch (error) {
+                  setFile(null);
+                  setError(message(error));
+                }
+              } else setFile(null);
+            }}
+          />
+        </label>
+      )}
+      <p className="tool-hint" id="hash-note">
+        UTF-8 text, including whitespace, is hashed exactly as entered. File
+        limit: 32 MiB. Files stay in this tab.
+      </p>
+    </div>
+  );
+
+  const checksumOutputBlock = (
+    <>
+      <div className="checksum-output">
+        <Editor
+          label="Computed checksum"
+          value={digest}
+          readOnly
+          compact
+          placeholder="Computed hexadecimal checksum appears here"
+          actions={
+            digest ? (
+              <>
+                <CopyButton
+                  value={digest}
+                  label="Copy checksum"
+                  className="text-button small"
+                />
+                <DownloadButton
+                  value={digest}
+                  filename={`${algorithm.toLowerCase()}.txt`}
+                  label="Download"
+                  className="text-button small"
+                />
+              </>
+            ) : undefined
+          }
+        />
+      </div>
+      <label className="field">
+        Expected checksum
+        <input
+          value={expected}
+          onChange={(event) => setExpected(event.target.value)}
+          placeholder={`Paste an expected ${algorithm} hex digest`}
+          aria-describedby="hash-verdict"
+          maxLength={512}
+          spellCheck={false}
+        />
+      </label>
+      {digest && comparison === 'match' ? (
+        <div className="hash-verdict-banner match" role="status">
+          <div className="hash-verdict-icon" aria-hidden="true">
+            <CheckIcon />
+          </div>
+          <div className="hash-verdict-content">
+            <strong id="hash-verdict" className="hash-verdict-title">
+              Checksums match
+            </strong>
+            <p className="hash-verdict-desc">
+              The computed {algorithm} hash exactly matches the expected
+              checksum.
+            </p>
+          </div>
+        </div>
+      ) : digest && comparison === 'mismatch' ? (
+        <div className="hash-verdict-banner mismatch" role="status">
+          <div className="hash-verdict-icon" aria-hidden="true">
+            !
+          </div>
+          <div className="hash-verdict-content">
+            <strong id="hash-verdict" className="hash-verdict-title">
+              Checksums do not match
+            </strong>
+            <p className="hash-verdict-desc">
+              The computed {algorithm} hash differs from the expected checksum.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <p
+          id="hash-verdict"
+          role="status"
+          className={comparison === 'invalid' ? 'inline-error' : 'tool-hint'}
+        >
+          {verdict}
+        </p>
+      )}
+      <p className="tool-hint">
+        A match confirms agreement with the supplied checksum. It does not prove
+        a file is safe or authenticate its publisher.
+      </p>
+    </>
+  );
+
   return (
     <ToolReady>
       <div className="tool-bar">
@@ -109,44 +249,7 @@ export default function HashChecksum() {
           </button>
         </div>
       </div>
-      {mode === 'text' ? (
-        <Editor
-          label="Text to hash"
-          value={input}
-          onChange={(value) => {
-            invalidate();
-            setInput(value);
-          }}
-          placeholder="Type text, or leave empty to hash an empty string"
-          describedBy="hash-status hash-note"
-        />
-      ) : (
-        <label className="field hash-file">
-          Choose file
-          <input
-            ref={fileInput}
-            type="file"
-            aria-describedby="hash-note hash-status"
-            onChange={(event) => {
-              invalidate();
-              const selected = event.target.files?.[0] ?? null;
-              if (selected) {
-                try {
-                  validateFileSize(selected.size);
-                  setFile(selected);
-                } catch (error) {
-                  setFile(null);
-                  setError(message(error));
-                }
-              } else setFile(null);
-            }}
-          />
-        </label>
-      )}
-      <p className="tool-hint" id="hash-note">
-        UTF-8 text, including whitespace, is hashed exactly as entered. File
-        limit: 32 MiB. Files stay in this tab.
-      </p>
+
       <p
         id="hash-status"
         className={error ? 'inline-error' : 'tool-hint'}
@@ -159,56 +262,15 @@ export default function HashChecksum() {
               ? `${algorithm} checksum calculated.`
               : 'Choose a source and calculate its checksum.')}
       </p>
-      <div className="checksum-output">
-        <Editor
-          label="Computed checksum"
-          value={digest}
-          readOnly
-          actions={
-            <>
-              <CopyButton
-                value={digest}
-                label="Copy checksum"
-                className="text-button small"
-              />
-              <DownloadButton
-                value={digest}
-                filename={`${algorithm.toLowerCase()}.txt`}
-                label="Download"
-                className="text-button small"
-              />
-            </>
-          }
-        />
-      </div>
-      <label className="field">
-        Expected checksum
-        <input
-          value={expected}
-          onChange={(event) => setExpected(event.target.value)}
-          placeholder={`Paste an expected ${algorithm} hex digest`}
-          aria-describedby="hash-verdict"
-          maxLength={512}
-          spellCheck={false}
-        />
-      </label>
-      <p
-        id="hash-verdict"
-        role="status"
-        className={
-          comparison === 'match'
-            ? 'inline-success'
-            : comparison === 'invalid' || comparison === 'mismatch'
-              ? 'inline-error'
-              : 'tool-hint'
-        }
-      >
-        {verdict}
-      </p>
-      <p className="tool-hint">
-        A match confirms agreement with the supplied checksum. It does not prove
-        a file is safe or authenticate its publisher.
-      </p>
+
+      {/* If hash is computed: OUTPUT FIRST on top */}
+      {digest && checksumOutputBlock}
+
+      {/* Source input: either at the top if no digest, or below checksum if computed */}
+      {sourceInputBlock}
+
+      {/* If no hash computed yet, checksum output sits below the input as placeholder */}
+      {!digest && checksumOutputBlock}
     </ToolReady>
   );
 }

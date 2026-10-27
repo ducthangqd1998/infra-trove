@@ -7,8 +7,8 @@ const indexable = process.env.PUBLIC_INDEXABLE === 'true';
 const files = await readdir('dist', { recursive: true });
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
 assert(
-  htmlFiles.length >= 35,
-  'Expected site, 12 tools and 7 bilingual guides',
+  htmlFiles.length >= 37,
+  'Expected site, 12 tools and 8 bilingual guides',
 );
 for (const page of [
   'blog/index.html',
@@ -26,6 +26,7 @@ for (const page of [
     'jwt-claims-without-verification',
     'storage-units-gb-gib',
     'verify-file-checksum',
+    'mermaid-diagram-as-code',
   ].flatMap((slug) => [
     `blog/${slug}/index.html`,
     `vi/blog/${slug}/index.html`,

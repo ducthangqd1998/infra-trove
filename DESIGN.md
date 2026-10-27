@@ -90,6 +90,11 @@ typography:
     fontSize: 1rem
     fontWeight: 400
     lineHeight: 1.85
+  body-prose-vi:
+    fontFamily: Be Vietnam Pro
+    fontSize: 1rem
+    fontWeight: 400
+    lineHeight: 1.85
   label-md:
     fontFamily: Geist Variable
     fontSize: 0.875rem
@@ -333,8 +338,15 @@ first paint.
 
 ## Typography
 
-One family, **Geist Variable**, with **Geist Mono Variable** for code, tool symbols and the cron
-field. Weights 400, 500 and 600 only.
+**Geist Variable** is the default for English content and the site UI. Vietnamese blog content
+uses **Be Vietnam Pro** through `--font-sans-vi`, scoped to `.blog-content[lang='vi']` on both the
+guide index and article pages. This includes translated titles, prose, cards, navigation and
+comments. Header, footer and tool pages keep Geist. **Geist Mono Variable** remains the font for
+code, tool symbols and the cron field in both languages. Weights 400, 500 and 600 only.
+
+All fonts are self-hosted. Be Vietnam Pro includes normal and true italic faces at all three
+weights. Its regular Latin and Vietnamese subsets are preloaded only on `/vi/blog/` routes;
+other weights and italics load on demand. English pages never request Be Vietnam Pro font files.
 
 - **display-lg:** reserved for display headings; the home directory uses a compact
   `clamp(2rem, 3vw, 2.5rem)` heading so tools stay near the top.

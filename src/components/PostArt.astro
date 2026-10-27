@@ -13,6 +13,7 @@ const scenes = [
   'base64-vs-base64url',
   'json-trailing-commas',
   'unix-cron-basics',
+  'mermaid-diagram-as-code',
 ];
 const hex = ['h1', 'h2', 'paper', 'h3', 'paper', 'h2', 'h1', 'paper'];
 const cells = [...Array(10).keys()];
@@ -311,6 +312,49 @@ const lit = new Set([2, 5, 6, 11]);
         </g>
       ))}
       <path class="a-ink a-bare a-dash" d="M142 176v36M338 184v28" />
+    </g>
+  )}
+
+  {slug === 'mermaid-diagram-as-code' && (
+    <g>
+      <rect
+        class="a-ink a-bare a-dash"
+        x="60"
+        y="44"
+        width="360"
+        height="232"
+        rx="16"
+      />
+      <rect class="a-ink f-h2" x="80" y="34" width="96" height="20" rx="6" />
+      <path class="a-ink a-bare" d="M96 44h64" />
+      <rect class="a-ink f-paper" x="90" y="90" width="80" height="46" rx="8" />
+      <path class="a-ink a-bare" d="M106 113h48" />
+      <path class="a-ink a-bare" d="M170 113h32m-8-6 8 6-8 6" />
+      <rect class="a-ink f-h1" x="210" y="90" width="90" height="46" rx="8" />
+      <path class="a-ink a-bare" d="M228 113h54" />
+      <path class="a-ink a-bare" d="M300 113h32m-8-6 8 6-8 6" />
+      <ellipse class="a-ink f-paper" cx="370" cy="98" rx="28" ry="8" />
+      <path
+        class="a-ink f-paper"
+        d="M342 98v28c0 4.4 12.5 8 28 8s28-3.6 28-8V98"
+      />
+      <path
+        class="a-ink a-bare a-faint"
+        d="M342 112c0 4.4 12.5 8 28 8s28-3.6 28-8"
+      />
+      <path class="a-ink a-bare" d="M255 136v26m-6-8 6 8 6-8" />
+      <path class="a-ink f-h3" d="M255 170l32 24-32 24-32-24Z" />
+      <circle class="f-ink" cx="255" cy="194" r="4" />
+      <path class="a-ink a-bare a-dash" d="M223 194h-25m8-6-8 6 8 6" />
+      <rect
+        class="a-ink f-paper"
+        x="90"
+        y="172"
+        width="100"
+        height="44"
+        rx="22"
+      />
+      <path class="a-ink a-bare" d="M115 194h50" />
     </g>
   )}
   {/* A guide without its own scene still gets a framed page. */}

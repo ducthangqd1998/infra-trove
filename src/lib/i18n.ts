@@ -38,6 +38,10 @@ export const blogText: Record<
     copyCode: string;
     copiedCode: string;
     tableLabel: string;
+    diagramTab: string;
+    codeTab: string;
+    diagramLabel: string;
+    diagramError: string;
   }
 > = {
   en: {
@@ -77,6 +81,10 @@ export const blogText: Record<
     copyCode: 'Copy code',
     copiedCode: 'Copied',
     tableLabel: 'Scrollable table',
+    diagramTab: 'Diagram',
+    codeTab: 'Code',
+    diagramLabel: 'Diagram preview',
+    diagramError: 'Unable to render diagram preview. Displaying raw source.',
   },
   vi: {
     indexTitle: 'Hướng dẫn thực hành',
@@ -115,5 +123,9 @@ export const blogText: Record<
     copyCode: 'Sao chép mã',
     copiedCode: 'Đã sao chép',
     tableLabel: 'Bảng có thể cuộn',
+    diagramTab: 'Biểu đồ',
+    codeTab: 'Mã nguồn',
+    diagramLabel: 'Bản xem trước biểu đồ',
+    diagramError: 'Không thể kết xuất biểu đồ. Đang hiển thị mã nguồn.',
   },
 };

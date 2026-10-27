@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildDiffRows,
   compareText,
+  findChangeHunks,
   inlineDiff,
+  type ChangeHunk,
   type DiffCell,
   type SplitRow,
   type UnifiedRow,
@@ -59,12 +61,16 @@ function SplitTable({
   changed,
   removedCount,
   addedCount,
+  activeHunk,
+  onRowClick,
 }: {
   rows: SplitRow[];
   original: string;
   changed: string;
   removedCount: number;
   addedCount: number;
+  activeHunk?: ChangeHunk | null;
+  onRowClick?: (rowIndex: number) => void;
 }) {
   const originalLines = original ? original.split('\n').length : 0;
   const changedLines = changed ? changed.split('\n').length : 0;
@@ -144,11 +150,26 @@ function SplitTable({
             row.left?.type === 'removed' && row.right?.type === 'added'
               ? inlineDiff(row.left.text, row.right.text)
               : null;
+          const isHunkActive =
+            activeHunk &&
+            index >= activeHunk.startIdx &&
+            index <= activeHunk.endIdx;
+          const isHunkStart = activeHunk && index === activeHunk.startIdx;
+          const isHunkEnd = activeHunk && index === activeHunk.endIdx;
+          const rowClasses = [
+            isChange ? 'diff-change-row' : '',
+            isHunkActive ? 'diff-hunk-active' : '',
+            isHunkStart ? 'diff-hunk-start' : '',
+            isHunkEnd ? 'diff-hunk-end' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
           return (
             <tr
               key={index}
               id={`diff-row-${index}`}
-              className={isChange ? 'diff-change-row' : undefined}
+              className={rowClasses || undefined}
+              onClick={() => isChange && onRowClick?.(index)}
             >
               {row.left ? (
                 <>
@@ -192,10 +213,14 @@ function UnifiedTable({
   rows,
   removedCount,
   addedCount,
+  activeHunk,
+  onRowClick,
 }: {
   rows: UnifiedRow[];
   removedCount: number;
   addedCount: number;
+  activeHunk?: ChangeHunk | null;
+  onRowClick?: (rowIndex: number) => void;
 }) {
   return (
     <table className="diff-table unified">
@@ -235,17 +260,35 @@ function UnifiedTable({
         </tr>
       </thead>
       <tbody>
-        {rows.map((row, index) => (
-          <tr
-            key={index}
-            id={`diff-row-${index}`}
-            className={row.type !== 'same' ? 'diff-change-row' : undefined}
-          >
-            <td className="ln">{row.oldN ?? ''}</td>
-            <td className="ln">{row.newN ?? ''}</td>
-            <Code type={row.type} text={row.text} />
-          </tr>
-        ))}
+        {rows.map((row, index) => {
+          const isChange = row.type !== 'same';
+          const isHunkActive =
+            activeHunk &&
+            index >= activeHunk.startIdx &&
+            index <= activeHunk.endIdx;
+          const isHunkStart = activeHunk && index === activeHunk.startIdx;
+          const isHunkEnd = activeHunk && index === activeHunk.endIdx;
+          const rowClasses = [
+            isChange ? 'diff-change-row' : '',
+            isHunkActive ? 'diff-hunk-active' : '',
+            isHunkStart ? 'diff-hunk-start' : '',
+            isHunkEnd ? 'diff-hunk-end' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          return (
+            <tr
+              key={index}
+              id={`diff-row-${index}`}
+              className={rowClasses || undefined}
+              onClick={() => isChange && onRowClick?.(index)}
+            >
+              <td className="ln">{row.oldN ?? ''}</td>
+              <td className="ln">{row.newN ?? ''}</td>
+              <Code type={row.type} text={row.text} />
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -262,9 +305,10 @@ export default function TextCompare() {
   const [error, setError] = useState('');
   const [view, setView] = useState('split');
   const [showInputs, setShowInputs] = useState(false);
-  const [currentDiffIdx, setCurrentDiffIdx] = useState(0);
+  const [activeHunkIdx, setActiveHunkIdx] = useState(0);
   const resultRef = useRef<HTMLElement>(null);
   const inputsRef = useRef<HTMLDivElement>(null);
+  const diffScrollRef = useRef<HTMLDivElement>(null);
 
   // Narrow screens cannot fit two columns of text; start them in the unified view.
   useEffect(() => {
@@ -276,33 +320,74 @@ export default function TextCompare() {
     setError('');
   }
 
-  const changedIndices = useMemo(() => {
+  const hunks = useMemo(() => {
     if (!result) return [];
     const rows = view === 'split' ? result.split : result.unified;
-    const indices: number[] = [];
-    rows.forEach((r, idx) => {
-      if (view === 'split') {
-        const row = r as SplitRow;
-        if (row.left?.type === 'removed' || row.right?.type === 'added')
-          indices.push(idx);
-      } else {
-        const row = r as UnifiedRow;
-        if (row.type !== 'same') indices.push(idx);
-      }
-    });
-    return indices;
+    return findChangeHunks(rows, view as 'split' | 'unified');
   }, [result, view]);
 
-  function jumpDiff(direction: 1 | -1) {
-    if (changedIndices.length === 0) return;
-    const next =
-      (currentDiffIdx + direction + changedIndices.length) %
-      changedIndices.length;
-    setCurrentDiffIdx(next);
-    const rowId = `diff-row-${changedIndices[next]}`;
-    const el = document.getElementById(rowId);
-    el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  const activeHunk = hunks[activeHunkIdx] ?? null;
+
+  function scrollToHunk(hunk: ChangeHunk) {
+    const rowEl = document.getElementById(`diff-row-${hunk.startIdx}`);
+    const container = diffScrollRef.current;
+    if (!rowEl || !container) return;
+    const rowRect = rowEl.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const relativeTop = rowRect.top - containerRect.top + container.scrollTop;
+    const targetScrollTop = Math.max(
+      0,
+      relativeTop - Math.max(40, container.clientHeight * 0.25),
+    );
+    container.scrollTo({
+      top: targetScrollTop,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+    });
   }
+
+  function jumpHunk(direction: 1 | -1) {
+    if (hunks.length === 0) return;
+    const next = (activeHunkIdx + direction + hunks.length) % hunks.length;
+    setActiveHunkIdx(next);
+    scrollToHunk(hunks[next]);
+  }
+
+  function handleRowClick(rowIndex: number) {
+    const foundIdx = hunks.findIndex(
+      (h) => rowIndex >= h.startIdx && rowIndex <= h.endIdx,
+    );
+    if (foundIdx !== -1 && foundIdx !== activeHunkIdx) {
+      setActiveHunkIdx(foundIdx);
+    }
+  }
+
+  // Keyboard shortcut navigation (F7 for next, Shift+F7 for previous difference hunk)
+  useEffect(() => {
+    if (hunks.length === 0) return;
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === 'F7') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          jumpHunk(-1);
+        } else {
+          jumpHunk(1);
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [hunks, activeHunkIdx]);
 
   function compare() {
     try {
@@ -314,7 +399,7 @@ export default function TextCompare() {
         ),
       );
       setError('');
-      setCurrentDiffIdx(0);
+      setActiveHunkIdx(0);
       setShowInputs(false);
       requestAnimationFrame(() =>
         resultRef.current?.scrollIntoView({
@@ -535,68 +620,91 @@ export default function TextCompare() {
                 )}
               </p>
               <div className="diff-tools">
+                <div
+                  className="diff-tools-group"
+                  role="toolbar"
+                  aria-label="Difference view and navigation"
+                >
+                  {hunks.length > 0 && (
+                    <div
+                      className="diff-nav"
+                      aria-label="Difference navigation"
+                    >
+                      <button
+                        type="button"
+                        className="diff-nav-btn"
+                        onClick={() => jumpHunk(-1)}
+                        disabled={hunks.length <= 1}
+                        title="Previous difference (Shift+F7)"
+                        aria-label="Previous difference"
+                      >
+                        <span aria-hidden="true">↑</span> Prev
+                      </button>
+                      <span
+                        className="diff-nav-count"
+                        aria-live="polite"
+                        title={`Difference ${activeHunkIdx + 1} of ${hunks.length}`}
+                      >
+                        {activeHunkIdx + 1} / {hunks.length}
+                      </span>
+                      <button
+                        type="button"
+                        className="diff-nav-btn"
+                        onClick={() => jumpHunk(1)}
+                        disabled={hunks.length <= 1}
+                        title="Next difference (F7)"
+                        aria-label="Next difference"
+                      >
+                        Next <span aria-hidden="true">↓</span>
+                      </button>
+                    </div>
+                  )}
+                  <Segmented
+                    label="View mode"
+                    hideLabel
+                    value={view}
+                    options={[
+                      { value: 'split', label: 'Side by side' },
+                      { value: 'unified', label: 'Unified' },
+                    ]}
+                    onChange={(nextView) => {
+                      setView(nextView);
+                      setActiveHunkIdx(0);
+                    }}
+                  />
+                </div>
+
+                <div className="diff-tools-sep" aria-hidden="true" />
+
+                <div
+                  className="diff-tools-group actions"
+                  aria-label="Diff actions"
+                >
+                  <CopyButton
+                    value={copyText}
+                    label="Copy"
+                    className="text-button small"
+                  />
+                  <DownloadButton
+                    value={copyText}
+                    filename="diff.patch"
+                    label="Download"
+                    className="text-button small"
+                  />
+                </div>
+
+                <div className="diff-tools-sep" aria-hidden="true" />
+
                 <button
                   type="button"
-                  className="text-button small"
+                  className="text-button small diff-edit-toggle"
                   onClick={toggleInputs}
                 >
                   {showInputs ? 'Hide inputs' : 'Edit inputs'}
                 </button>
-                {changedIndices.length > 0 && (
-                  <div
-                    className="diff-nav"
-                    role="toolbar"
-                    aria-label="Difference navigation"
-                  >
-                    <button
-                      type="button"
-                      className="text-button small"
-                      onClick={() => jumpDiff(-1)}
-                      title="Previous difference"
-                      aria-label="Previous difference"
-                    >
-                      ↑ Prev
-                    </button>
-                    <span className="diff-nav-count" aria-live="polite">
-                      {currentDiffIdx + 1} / {changedIndices.length}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-button small"
-                      onClick={() => jumpDiff(1)}
-                      title="Next difference"
-                      aria-label="Next difference"
-                    >
-                      Next ↓
-                    </button>
-                  </div>
-                )}
-                <Segmented
-                  label="View"
-                  value={view}
-                  options={[
-                    { value: 'split', label: 'Side by side' },
-                    { value: 'unified', label: 'Unified' },
-                  ]}
-                  onChange={(nextView) => {
-                    setView(nextView);
-                    setCurrentDiffIdx(0);
-                  }}
-                />
-                <CopyButton
-                  value={copyText}
-                  label="Copy diff"
-                  className="text-button"
-                />
-                <DownloadButton
-                  value={copyText}
-                  filename="diff.patch"
-                  label="Download diff"
-                  className="text-button"
-                />
               </div>
             </div>
-            <div className="diff-scroll">
+            <div className="diff-scroll" ref={diffScrollRef}>
               {view === 'split' ? (
                 <SplitTable
                   rows={result.split}
@@ -604,12 +712,16 @@ export default function TextCompare() {
                   changed={changed}
                   removedCount={result.removed}
                   addedCount={result.added}
+                  activeHunk={activeHunk}
+                  onRowClick={handleRowClick}
                 />
               ) : (
                 <UnifiedTable
                   rows={result.unified}
                   removedCount={result.removed}
                   addedCount={result.added}
+                  activeHunk={activeHunk}
+                  onRowClick={handleRowClick}
                 />
               )}
             </div>

@@ -4,7 +4,12 @@ import { transformBase64 } from './encoding/base64';
 import { transformUrl } from './encoding/url';
 import { generatePassword, passwordStrength } from './password-generator/logic';
 import { generateUuids } from './uuid-generator/logic';
-import { buildDiffRows, compareText, inlineDiff } from './text-compare/logic';
+import {
+  buildDiffRows,
+  compareText,
+  findChangeHunks,
+  inlineDiff,
+} from './text-compare/logic';
 import {
   timestampToDate,
   dateToTimestamp,
@@ -276,6 +281,37 @@ describe('diff rows', () => {
       words?.right.filter((part) => part.changed).map((part) => part.text),
     ).toEqual(['2']);
     expect(inlineDiff('a'.repeat(1500), 'b'.repeat(1500))).toBeNull();
+  });
+  it('groups contiguous changed lines into single hunks in split and unified views', () => {
+    const orig = 'line 1\nline 2\nline 3\nline 4\nline 5\nline 6';
+    const chg = 'line 1\nline 2 mod\nline 3 mod\nline 4\nline 5 mod\nline 6';
+    const rows = buildDiffRows(compareText(orig, chg), orig, chg);
+    const splitHunks = findChangeHunks(rows.split, 'split');
+    expect(splitHunks).toHaveLength(2);
+    expect(splitHunks[0]).toEqual({
+      id: 1,
+      startIdx: 1,
+      endIdx: 2,
+      lineCount: 2,
+    });
+    expect(splitHunks[1]).toEqual({
+      id: 2,
+      startIdx: 4,
+      endIdx: 4,
+      lineCount: 1,
+    });
+
+    const unifiedHunks = findChangeHunks(rows.unified, 'unified');
+    expect(unifiedHunks).toHaveLength(2);
+    // In unified view, the two modifications are grouped into 2 hunks
+    expect(unifiedHunks[0].lineCount).toBe(4); // 2 removed + 2 added
+    expect(unifiedHunks[1].lineCount).toBe(2); // 1 removed + 1 added
+  });
+  it('returns empty hunks when text is identical', () => {
+    const text = 'identical text\nsecond line';
+    const rows = buildDiffRows(compareText(text, text), text, text);
+    expect(findChangeHunks(rows.split, 'split')).toEqual([]);
+    expect(findChangeHunks(rows.unified, 'unified')).toEqual([]);
   });
 });
 describe('tool helpers', () => {

@@ -135,3 +135,58 @@ export function inlineDiff(before: string, after: string) {
       .map((part) => ({ text: part.value, changed: !!part.added })),
   };
 }
+
+export type ChangeHunk = {
+  id: number;
+  startIdx: number;
+  endIdx: number;
+  lineCount: number;
+};
+
+/**
+ * Groups contiguous changed diff rows into a single hunk (change block).
+ * This allows jumping between distinct change blocks instead of line-by-line.
+ */
+export function findChangeHunks(
+  rows: (SplitRow | UnifiedRow)[],
+  view: 'split' | 'unified',
+): ChangeHunk[] {
+  const hunks: ChangeHunk[] = [];
+  let inHunk = false;
+  let startIdx = 0;
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const isChange =
+      view === 'split'
+        ? (row as SplitRow).left?.type === 'removed' ||
+          (row as SplitRow).right?.type === 'added'
+        : (row as UnifiedRow).type !== 'same';
+
+    if (isChange) {
+      if (!inHunk) {
+        inHunk = true;
+        startIdx = i;
+      }
+    } else if (inHunk) {
+      hunks.push({
+        id: hunks.length + 1,
+        startIdx,
+        endIdx: i - 1,
+        lineCount: i - startIdx,
+      });
+      inHunk = false;
+    }
+  }
+
+  if (inHunk) {
+    hunks.push({
+      id: hunks.length + 1,
+      startIdx,
+      endIdx: rows.length - 1,
+      lineCount: rows.length - startIdx,
+    });
+  }
+
+  return hunks;
+}

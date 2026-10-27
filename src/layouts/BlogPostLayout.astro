@@ -4,7 +4,6 @@ import Icon from '../components/Icon.astro';
 import Comments from '../components/Comments.astro';
 import PostCard from '../components/PostCard.astro';
 import PostArt from '../components/PostArt.astro';
-import BrandLogo from '../components/BrandLogo.astro';
 import { getTool } from '../data/tools';
 import { blogText } from '../lib/i18n';
 import {
@@ -116,13 +115,13 @@ const articleStructuredData = [
   alternates={alternates}
   structuredData={articleStructuredData}
 >
-  <article class="container post-article" lang={lang}>
+  <article class="container post-article blog-content" lang={lang}>
     <div class="post-layout">
       <header class="post-header">
         <div class="post-hero-text">
           <div class="post-header-top">
             <nav class="breadcrumbs" aria-label="Breadcrumb">
-              <a href={indexHref}>{t.indexTitle}</a>
+              <a href={indexHref}>{t.badge}</a>
               <span class="breadcrumb-sep" aria-hidden="true">
                 /
               </span>
@@ -139,7 +138,7 @@ const articleStructuredData = [
                 hreflang={otherLang}
                 lang={otherLang}
               >
-                <Icon name="globe" size={14} />
+                <Icon name="globe" size={13} />
                 <span>{t.translationLink}</span>
               </a>
             )}
@@ -149,28 +148,24 @@ const articleStructuredData = [
           <p class="post-lead">{post.data.description}</p>
 
           <div class="post-meta">
-            <div class="post-byline">
-              <span class="byline-mark">
-                <BrandLogo size={20} />
-              </span>
-              <span class="byline-text">
-                <strong>{t.byline}</strong>
-                <span>
-                  {t.updated}{' '}
-                  <time datetime={post.data.updated}>
-                    {formatDate(post.data.updated, lang)}
-                  </time>
-                  <span aria-hidden="true"> · </span>
-                  {post.data.readingTime}
-                </span>
-              </span>
-            </div>
+            <time datetime={post.data.updated}>
+              {formatDate(post.data.updated, lang)}
+            </time>
+            <span class="meta-dot" aria-hidden="true">
+              ·
+            </span>
+            <span>{post.data.readingTime}</span>
             {tool && (
-              <a class="meta-tool-link" href={`/tools/${tool.slug}/`}>
-                <span>Companion tool:</span>
-                <strong>{tool.shortTitle}</strong>
-                <Icon name="arrow-up-right" size={13} />
-              </a>
+              <>
+                <span class="meta-dot" aria-hidden="true">
+                  ·
+                </span>
+                <a class="meta-tool-link" href={`/tools/${tool.slug}/`}>
+                  <span>Companion tool:</span>
+                  <strong>{tool.shortTitle}</strong>
+                  <Icon name="arrow-up-right" size={12} />
+                </a>
+              </>
             )}
           </div>
         </div>
@@ -183,6 +178,10 @@ const articleStructuredData = [
         data-copy={t.copyCode}
         data-copied={t.copiedCode}
         data-table={t.tableLabel}
+        data-tab-diagram={t.diagramTab}
+        data-tab-code={t.codeTab}
+        data-diagram-label={t.diagramLabel}
+        data-diagram-error={t.diagramError}
       >
         <Content />
       </div>
@@ -243,44 +242,223 @@ const articleStructuredData = [
   </article>
 </BaseLayout>
 <script>
+  import { getDiagramType } from '../lib/mermaid-utils';
+
   const prose = document.querySelector<HTMLElement>('.prose');
   if (prose) {
-    const { copy = '', copied = '', table = '' } = prose.dataset;
+    const {
+      copy = '',
+      copied = '',
+      table = '',
+      tabDiagram: tabDiagramText = 'Diagram',
+      tabCode: tabCodeText = 'Code',
+      diagramLabel = 'Diagram preview',
+      diagramError = 'Unable to render diagram preview.',
+    } = prose.dataset;
 
     // Code blocks: an icon button in the corner copies the block.
     const icon = (d: string) =>
       `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
     const copyIcon = icon('M9 9h10v11H9V9ZM5 15V4h10');
     const doneIcon = icon('m5 12 4 4 10-10');
+
+    type MermaidItem = {
+      card: HTMLElement;
+      viewport: HTMLElement;
+      errorNotice: HTMLElement;
+      code: string;
+      id: string;
+    };
+    const mermaidItems: MermaidItem[] = [];
+    let mermaidCounter = 0;
+
     prose.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'code-block';
-      pre.replaceWith(wrap);
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'code-copy';
-      button.setAttribute('aria-label', copy);
-      button.innerHTML = copyIcon;
-      const status = document.createElement('span');
-      status.className = 'sr-only';
-      status.setAttribute('role', 'status');
-      button.addEventListener('click', async () => {
+      const isMermaid = pre.getAttribute('data-language') === 'mermaid';
+      const rawCode = pre.textContent?.trim() ?? '';
+
+      if (!isMermaid) {
+        const codeWrap = document.createElement('div');
+        codeWrap.className = 'code-block';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'code-copy';
+        button.setAttribute('aria-label', copy);
+        button.innerHTML = copyIcon;
+        const status = document.createElement('span');
+        status.className = 'sr-only';
+        status.setAttribute('role', 'status');
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(rawCode);
+          } catch {
+            return;
+          }
+          button.innerHTML = doneIcon;
+          button.dataset.done = '';
+          status.textContent = copied;
+          setTimeout(() => {
+            button.innerHTML = copyIcon;
+            delete button.dataset.done;
+            status.textContent = '';
+          }, 1600);
+        });
+        codeWrap.append(button, status);
+        pre.replaceWith(codeWrap);
+        codeWrap.prepend(pre);
+        return;
+      }
+
+      // Mermaid diagram card
+      const card = document.createElement('div');
+      card.className = 'mermaid-card';
+      card.dataset.view = 'diagram';
+
+      const type = getDiagramType(rawCode);
+      const diagramIndex = ++mermaidCounter;
+      const diagramId = `mermaid-${Date.now()}-${diagramIndex}`;
+      const uniqueDiagramLabel = `${diagramLabel}: ${type} (${diagramIndex})`;
+
+      const controls = document.createElement('div');
+      controls.className = 'mermaid-controls';
+
+      const tabs = document.createElement('div');
+      tabs.className = 'mermaid-tabs';
+      tabs.setAttribute('role', 'tablist');
+      tabs.setAttribute('aria-label', uniqueDiagramLabel);
+
+      const tabDiagram = document.createElement('button');
+      tabDiagram.type = 'button';
+      tabDiagram.setAttribute('role', 'tab');
+      tabDiagram.className = 'mermaid-tab';
+      tabDiagram.dataset.tab = 'diagram';
+      tabDiagram.setAttribute('aria-selected', 'true');
+      tabDiagram.textContent = tabDiagramText;
+
+      const tabCode = document.createElement('button');
+      tabCode.type = 'button';
+      tabCode.setAttribute('role', 'tab');
+      tabCode.className = 'mermaid-tab';
+      tabCode.dataset.tab = 'code';
+      tabCode.setAttribute('aria-selected', 'false');
+      tabCode.textContent = tabCodeText;
+
+      tabs.append(tabDiagram, tabCode);
+
+      const actions = document.createElement('div');
+      actions.className = 'mermaid-actions';
+      const actionCopy = document.createElement('button');
+      actionCopy.type = 'button';
+      actionCopy.className = 'mermaid-action-btn';
+      actionCopy.setAttribute('aria-label', copy);
+      actionCopy.innerHTML = copyIcon;
+      const actionStatus = document.createElement('span');
+      actionStatus.className = 'sr-only';
+      actionStatus.setAttribute('role', 'status');
+      actionCopy.addEventListener('click', async () => {
         try {
-          await navigator.clipboard.writeText(pre.textContent ?? '');
+          await navigator.clipboard.writeText(rawCode);
         } catch {
           return;
         }
-        button.innerHTML = doneIcon;
-        button.dataset.done = '';
-        status.textContent = copied;
+        actionCopy.innerHTML = doneIcon;
+        actionCopy.dataset.done = '';
+        actionStatus.textContent = copied;
         setTimeout(() => {
-          button.innerHTML = copyIcon;
-          delete button.dataset.done;
-          status.textContent = '';
+          actionCopy.innerHTML = copyIcon;
+          delete actionCopy.dataset.done;
+          actionStatus.textContent = '';
         }, 1600);
       });
-      wrap.append(pre, button, status);
+      actions.append(actionCopy, actionStatus);
+
+      controls.append(tabs, actions);
+
+      const errorNotice = document.createElement('div');
+      errorNotice.className = 'mermaid-error-notice';
+      errorNotice.hidden = true;
+      errorNotice.textContent = diagramError;
+
+      const viewport = document.createElement('div');
+      viewport.className = 'mermaid-viewport';
+      viewport.tabIndex = 0;
+      viewport.setAttribute('role', 'region');
+      viewport.setAttribute('aria-label', uniqueDiagramLabel);
+
+      const switchTab = (view: 'diagram' | 'code') => {
+        card.dataset.view = view;
+        tabDiagram.setAttribute(
+          'aria-selected',
+          view === 'diagram' ? 'true' : 'false',
+        );
+        tabCode.setAttribute(
+          'aria-selected',
+          view === 'code' ? 'true' : 'false',
+        );
+      };
+      tabDiagram.addEventListener('click', () => switchTab('diagram'));
+      tabCode.addEventListener('click', () => switchTab('code'));
+
+      pre.replaceWith(card);
+      const codeContainer = document.createElement('div');
+      codeContainer.className = 'mermaid-code-wrap';
+      codeContainer.append(pre);
+      card.append(controls, errorNotice, viewport, codeContainer);
+
+      mermaidItems.push({
+        card,
+        viewport,
+        errorNotice,
+        code: rawCode,
+        id: diagramId,
+      });
     });
+
+    if (mermaidItems.length > 0) {
+      import('../lib/mermaid').then(({ renderMermaidSvg }) => {
+        let renderRun = 0;
+        const renderAll = async (isDark: boolean) => {
+          const currentRun = ++renderRun;
+          for (let i = 0; i < mermaidItems.length; i++) {
+            if (currentRun !== renderRun) return;
+            const item = mermaidItems[i];
+            try {
+              const uniqueRenderId = `${item.id}-${currentRun}-${i}`;
+              const svg = await renderMermaidSvg(
+                uniqueRenderId,
+                item.code,
+                isDark,
+              );
+              if (currentRun !== renderRun) return;
+              item.viewport.innerHTML = svg;
+              item.errorNotice.hidden = true;
+            } catch (err) {
+              if (currentRun !== renderRun) return;
+              item.errorNotice.hidden = false;
+              item.card.dataset.view = 'code';
+              const tabDiagram = item.card.querySelector<HTMLButtonElement>(
+                '[data-tab="diagram"]',
+              );
+              const tabCode =
+                item.card.querySelector<HTMLButtonElement>('[data-tab="code"]');
+              tabDiagram?.setAttribute('aria-selected', 'false');
+              tabCode?.setAttribute('aria-selected', 'true');
+            }
+          }
+        };
+
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        renderAll(isDark);
+
+        const observer = new MutationObserver(() => {
+          const dark = document.documentElement.dataset.theme === 'dark';
+          renderAll(dark);
+        });
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme'],
+        });
+      });
+    }
 
     // Tables scroll sideways inside their own focusable region.
     prose.querySelectorAll<HTMLTableElement>('table').forEach((el) => {
