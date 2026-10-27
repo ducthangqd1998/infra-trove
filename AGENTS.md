@@ -34,7 +34,7 @@ infra-trove/
 ├── worker/                  # Worker for /api/* only: index.ts (routes), comments.ts (pure rules + tests)
 ├── migrations/              # D1 schema migrations (comments)
 ├── scripts/                 # Project automation (e.g. check-static.mjs)
-├── plans/                   # Architectural specifications (feature.md, techstack.md)
+├── plans/                   # Architectural specifications (feature.md, techstack.md, ux-benchmark.md)
 └── wrangler.jsonc           # Cloudflare Workers Static Assets configuration
 ```
 

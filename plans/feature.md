@@ -8,11 +8,18 @@ document_language: "English"
 brand: "InfraTrove"
 domain_candidate: "infratrove.com"
 primary_business_model: "Free online tools + evergreen content + SEO + display advertising"
+related_documents:
+  - "techstack.md"
+  - "ux-benchmark.md"
 ---
 
 # InfraTrove — Website Blueprint & Product Requirements (v0.1)
 
 > **Purpose:** Foundational blueprint covering product direction, design, content, SEO, and execution for InfraTrove. This is a **product specification document**, not a mandate to immediately build every conceivable feature, not a completed keyword research dataset, and not a guaranteed traffic or revenue projection.
+>
+> **Companion Documents:**
+> - [techstack.md](techstack.md) specifies the technical architecture, runtime choices, and deployment pipeline.
+> - [ux-benchmark.md](ux-benchmark.md) establishes workspace patterns, ergonomic benchmarks, and quality gates.
 >
 > **Confirmed Scope:** Free browser-based online tools; companion blog supporting organic search; primary monetization via non-intrusive display ads; priority on fast, useful, client-side, low-maintenance utilities; English-first global market; built and operated by a solo founder.
 >

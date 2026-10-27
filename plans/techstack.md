@@ -8,7 +8,9 @@ language: "en"
 website_language: "en"
 architecture: "Static-first website + client-side interactive utilities"
 business_model: "SEO + free online tools + evergreen content + display advertising"
-related_document: "feature.md"
+related_documents:
+  - "feature.md"
+  - "ux-benchmark.md"
 ---
 
 # InfraTrove — Tech Stack & Architecture (v1.0)
@@ -17,7 +19,11 @@ related_document: "feature.md"
 >
 > **Status:** Proposed technical baseline; not a finalized production benchmark or complete source codebase. Commands listed below are bootstrap guides and require package version compatibility checks at execution time.
 >
-> **Companion Document:** [feature.md](feature.md) defines product and UX requirements. If this technical document differs from the product blueprint in implementation details, **this document takes precedence for tech stack specifications**, while catalog status and tool priorities follow §5 of the product blueprint.
+> **Companion Documents:**
+> - [feature.md](feature.md) defines product and UX requirements.
+> - [ux-benchmark.md](ux-benchmark.md) establishes workspace patterns, ergonomic benchmarks, and quality gates.
+>
+> If this technical document differs from the product blueprint in implementation details, **this document takes precedence for tech stack specifications**, while catalog status and tool priorities follow §5 of the product blueprint.
 
 ## 1. Executive decision
 
