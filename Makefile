@@ -13,6 +13,7 @@ dev:
 		echo "Logs: tail -f $(LOG_FILE)"; \
 		exit 0; \
 	fi; \
+	pnpm astro dev stop >/dev/null 2>&1 || true; \
 	echo "Starting dev server in background..."; \
 	if [ -s "$$HOME/.nvm/nvm.sh" ]; then \
 		. "$$HOME/.nvm/nvm.sh" && nvm use >/dev/null 2>&1 || true; \
@@ -41,6 +42,7 @@ dev:
 
 stop:
 	@STOPPED=0; \
+	pnpm astro dev stop >/dev/null 2>&1 && STOPPED=1 || true; \
 	if [ -f "$(PID_FILE)" ]; then \
 		for pid in $$(cat "$(PID_FILE)"); do \
 			if kill -0 "$$pid" 2>/dev/null; then \

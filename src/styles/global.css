@@ -5115,6 +5115,9 @@ input[type='range']::-moz-range-thumb {
   padding-top: var(--s2);
   border-top: 1px solid var(--hairline);
 }
+.conversion-grid .result-output:empty {
+  display: none;
+}
 .result-rows div {
   grid-template-columns: 7.5rem minmax(0, 1fr) auto;
   align-items: center;
@@ -5171,9 +5174,27 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   gap: var(--s2);
 }
-.pw-actions .icon-button {
-  border-color: var(--line);
+/* Regenerate and copy are a pair: same box, border and radius. */
+.pw-actions .icon-button,
+.pw-actions .copy-icon {
+  min-width: 40px;
+  min-height: 40px;
+  padding: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   background: var(--surface);
+  color: var(--ink);
+}
+.pw-actions .icon-button:hover,
+.pw-actions .copy-icon:hover {
+  background: var(--hover);
+}
+@media (max-width: 767px) {
+  .pw-actions .icon-button,
+  .pw-actions .copy-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 .pw-strength {
   display: flex;
@@ -5779,11 +5800,11 @@ input[type='range']::-moz-range-thumb {
   padding-top: var(--s4);
   border-top: 1px solid var(--hairline);
 }
-.jwt-token-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--s2);
+/* Straight under the toolbar the toolbar's own rule is the divider. */
+.tool-bar + .jwt-token-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 .checksum-output {
   margin-bottom: var(--s4);

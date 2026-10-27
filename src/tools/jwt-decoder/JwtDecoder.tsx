@@ -36,29 +36,27 @@ export default function JwtDecoder() {
 
   const tokenInputBlock = (
     <div className="jwt-token-section">
-      <div className="jwt-token-header">
-        <span className="seg-label">
-          JWT Token {input ? `(${input.length} chars)` : ''}
-        </span>
-        {result.value && (
-          <button
-            type="button"
-            className="text-button small"
-            onClick={() => setShowToken((prev) => !prev)}
-          >
-            {showToken ? 'Collapse token' : 'Edit token'}
-          </button>
-        )}
-      </div>
       {showToken ? (
         <div className="jwt-token">
           <Editor
             label="JWT token"
+            meta={input ? `${input.length} chars` : undefined}
             value={input}
             onChange={setInput}
             compact
             placeholder="Paste a three-part JWT…"
             describedBy="jwt-status jwt-note"
+            actions={
+              result.value ? (
+                <button
+                  type="button"
+                  className="text-button small"
+                  onClick={() => setShowToken(false)}
+                >
+                  Collapse token
+                </button>
+              ) : undefined
+            }
           />
         </div>
       ) : (
